@@ -9,44 +9,42 @@ import java.sql.Timestamp
 
 fun ResultRow.toUser(): User {
     return User(
-        id = this[Users.id].value,
-        email = this[Users.email],
-        passwordHash = this[Users.passwordHash],
-        firstName = this[Users.firstName],
-        lastName = this[Users.lastName],
-        age = this[Users.age],
-        gender = this[Users.gender],
-        rating = this[Users.rating].toDouble(),
-        walletBalance = this[Users.walletBalance].toDouble(),
-        createdAt = (this[Users.createdAt] as Timestamp).toInstant(),
-        updatedAt = (this[Users.updatedAt] as Timestamp).toInstant()
+        id = this[UserTable.id].value,
+        email = this[UserTable.email],
+        passwordHash = this[UserTable.passwordHash],
+        firstName = this[UserTable.firstName],
+        lastName = this[UserTable.lastName],
+        age = this[UserTable.age],
+        gender = this[UserTable.gender],
+        rating = this[UserTable.rating].toDouble(),
+        walletBalance = this[UserTable.walletBalance].toDouble(),
+        createdAt = this[UserTable.createdAt],
+        updatedAt = this[UserTable.updatedAt]
     )
 }
 
-
-
 fun InsertStatement<EntityID<Int>>.fromUser(user: User) {
-    this[Users.email] = user.email
-    this[Users.passwordHash] = user.passwordHash
-    this[Users.firstName] = user.firstName
-    this[Users.lastName] = user.lastName
-    this[Users.age] = user.age
-    this[Users.gender] = user.gender
-    this[Users.rating] = user.rating
-    this[Users.walletBalance] = user.walletBalance
-    this[Users.createdAt] = user.createdAt
-    this[Users.updatedAt] = user.updatedAt
+    this[UserTable.email] = user.email
+    this[UserTable.passwordHash] = user.passwordHash
+    user.firstName?.let { this[UserTable.firstName] = it }
+    user.lastName?.let { this[UserTable.lastName] = it }
+    user.age?.let { this[UserTable.age] = it }
+    user.gender?.let { this[UserTable.gender] = it }
+    user.rating?.let { this[UserTable.rating] = it.toBigDecimal() }
+    this[UserTable.walletBalance] = user.walletBalance.toBigDecimal()
+    this[UserTable.createdAt] = user.createdAt
+    this[UserTable.updatedAt] = user.updatedAt
 }
 
 fun UpdateStatement.fromUser(user: User) {
-    this[Users.email] = user.email
-    this[Users.passwordHash] = user.passwordHash
-    this[Users.firstName] = user.firstName
-    this[Users.lastName] = user.lastName
-    this[Users.age] = user.age
-    this[Users.gender] = user.gender
-    this[Users.rating] = user.rating
-    this[Users.walletBalance] = user.walletBalance
-    this[Users.createdAt] = user.createdAt
-    this[Users.updatedAt] = user.updatedAt
+    this[UserTable.email] = user.email
+    this[UserTable.passwordHash] = user.passwordHash
+    user.firstName?.let { this[UserTable.firstName] = it }
+    user.lastName?.let { this[UserTable.lastName] = it }
+    user.age?.let { this[UserTable.age] = it }
+    user.gender?.let { this[UserTable.gender] = it }
+    user.rating?.let { this[UserTable.rating] = it.toBigDecimal() }
+    this[UserTable.walletBalance] = user.walletBalance.toBigDecimal()
+    this[UserTable.createdAt] = user.createdAt
+    this[UserTable.updatedAt] = user.updatedAt
 }

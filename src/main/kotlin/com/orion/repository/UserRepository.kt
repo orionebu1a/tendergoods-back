@@ -1,4 +1,5 @@
 import com.orion.converter.fromUser
+import com.orion.converter.toUser
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -10,7 +11,7 @@ class UserRepository {
     }
 
     fun findById(id: Int): User? = transaction {
-        UserTable.select { Users.id eq id }
+        UserTable.select { UserTable.id eq id }
             .mapNotNull { it.toUser() }
             .singleOrNull()
     }
@@ -23,8 +24,14 @@ class UserRepository {
         user.copy(id = id)
     }
 
+    fun findByLogin(login: String): User? = transaction {
+        UserTable.select { UserTable.email eq login }
+            .mapNotNull { it.toUser() }
+            .singleOrNull()
+    }
+
     fun update(user: User): Boolean = transaction {
-        UserTable.update({ Users.id eq user.id }) {
+        UserTable.update({ UserTable.id eq user.id }) {
             it.fromUser(user)
         } > 0
     }

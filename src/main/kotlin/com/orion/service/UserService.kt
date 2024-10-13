@@ -10,6 +10,8 @@ class UserService(private val userRepository: UserRepository) {
 
     fun registerUser(user: User): User = userRepository.create(user)
 
+    fun findByLogin(login: String): User? = userRepository.findByLogin(login)
+
     fun updateUser(user: User): Boolean = userRepository.update(user)
 
     fun deleteUser(id: Int): Boolean = userRepository.delete(id)

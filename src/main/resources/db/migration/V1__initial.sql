@@ -3,8 +3,8 @@ CREATE TABLE users
     id             SERIAL PRIMARY KEY,
     email          VARCHAR(255) UNIQUE NOT NULL,
     password_hash  VARCHAR(255)        NOT NULL,
-    first_name     VARCHAR(100)        NOT NULL,
-    last_name      VARCHAR(100)        NOT NULL,
+    first_name     VARCHAR(100),
+    last_name      VARCHAR(100),
     age            INT,
     gender         VARCHAR(10),
     rating         DECIMAL(3, 2)  DEFAULT 0.0,
@@ -26,13 +26,6 @@ CREATE TABLE items
     updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE items_in_bids
-(
-    item_id INT REFERENCES items (id) ON DELETE CASCADE,
-    bid_id  INT REFERENCES bids (id) ON DELETE CASCADE,
-    amount  INT
-);
-
 CREATE TABLE bids
 (
     id               SERIAL PRIMARY KEY,
@@ -46,6 +39,13 @@ CREATE TABLE bids
     start_time       TIMESTAMP      NOT NULL,
     end_time         TIMESTAMP      NOT NULL,
     promotion_rating INT
+);
+
+CREATE TABLE items_in_bids
+(
+    item_id INT REFERENCES items (id) ON DELETE CASCADE,
+    bid_id  INT REFERENCES bids (id) ON DELETE CASCADE,
+    amount  INT
 );
 
 CREATE TABLE messages
