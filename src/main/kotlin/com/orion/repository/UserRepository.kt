@@ -1,43 +1,63 @@
-import com.orion.converter.fromUser
-import com.orion.converter.toUser
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+package com.orion.repository
+
+import User
+import UserTable
+import com.orion.form.UserDto
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.Instant
 
 class UserRepository {
+
     fun findAll(): List<User> = transaction {
-        UserTable.selectAll().map { it.toUser() }
+        User.all().toList()
     }
 
     fun findById(id: Int): User? = transaction {
-        UserTable.select { UserTable.id eq id }
-            .mapNotNull { it.toUser() }
-            .singleOrNull()
+        User.findById(id)
     }
 
-    fun create(user: User): User = transaction {
-        val id = UserTable.insertAndGetId {
-            it.fromUser(user)
-        }.value
-
-        user.copy(id = id)
+    fun findByLogin(login: String): User = transaction {
+        User.find { UserTable.email eq login }.toList().first()
     }
 
-    fun findByLogin(login: String): User? = transaction {
-        UserTable.select { UserTable.email eq login }
-            .mapNotNull { it.toUser() }
-            .singleOrNull()
+    fun create(userDto: UserDto): User = transaction {
+        User.new {
+            email = userDto.email
+            passwordHash = userDto.passwordHash
+            firstName = userDto.firstName
+            lastName = userDto.lastName
+            age = userDto.age
+            gender = userDto.gender
+            rating = userDto.rating?.toBigDecimal()
+            walletBalance = userDto.walletBalance.toBigDecimal()
+            createdAt = Instant.now()
+            updatedAt = Instant.now()
+        }
     }
 
-    fun update(user: User): Boolean = transaction {
-        UserTable.update({ UserTable.id eq user.id }) {
-            it.fromUser(user)
-        } > 0
+    fun update(id: Int, userDto: UserDto): Boolean = transaction {
+        val user = User.findById(id) ?: return@transaction false
+
+        user.email = userDto.email
+        user.passwordHash = userDto.passwordHash
+        user.firstName = userDto.firstName
+        user.lastName = userDto.lastName
+        user.age = userDto.age
+        user.gender = userDto.gender
+        user.rating = userDto.rating?.toBigDecimal()
+        user.walletBalance = userDto.walletBalance.toBigDecimal()
+        user.updatedAt = Instant.now()
+
+        return@transaction true
     }
 
     fun delete(id: Int): Boolean = transaction {
-        UserTable.deleteWhere { UserTable.id eq EntityID(id, UserTable) } > 0
+        val user = User.findById(id)
+        if (user == null) {
+            return@transaction false
+        } else {
+            user.delete()
+            return@transaction true
+        }
     }
-
 }

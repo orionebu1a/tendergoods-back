@@ -1,21 +1,20 @@
+import com.orion.entity.Bid
 import io.ktor.server.auth.*
-import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.javatime.timestamp
-import java.time.Instant
+import org.jetbrains.exposed.dao.IntEntity
+import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 
-@Serializable
-data class User(
-    val id: Int? = null,
-    val email: String,
-    val passwordHash: String,
-    val firstName: String? = null,
-    val lastName: String? = null,
-    val age: Int? = null,
-    val gender: String? = null,
-    val rating: Double? = null,
-    val walletBalance: Double,
-    val createdAt: Instant,
-    val updatedAt: Instant
-): Principal
+class User(id: EntityID<Int>) : IntEntity(id), Principal {
+    companion object : IntEntityClass<User>(UserTable)
+
+    var email by UserTable.email
+    var passwordHash by UserTable.passwordHash
+    var firstName by UserTable.firstName
+    var lastName by UserTable.lastName
+    var age by UserTable.age
+    var gender by UserTable.gender
+    var rating by UserTable.rating
+    var walletBalance by UserTable.walletBalance
+    var createdAt by UserTable.createdAt
+    var updatedAt by UserTable.updatedAt
+}

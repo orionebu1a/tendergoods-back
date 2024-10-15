@@ -1,9 +1,9 @@
 package com.orion
 
 import User
-import UserRepository
-import com.google.gson.GsonBuilder
 import com.orion.api.userRouting
+import com.orion.form.UserDto
+import com.orion.repository.UserRepository
 import com.orion.security.JwtConfig
 import com.orion.security.JwtConfig.verifier
 import com.orion.security.PasswordService
@@ -89,12 +89,10 @@ fun Application.module() {
         post("register") {
             val credentials = call.receive<UserPasswordCredential>()
             userService.registerUser(
-                User(
+                UserDto(
                     email = credentials.name,
                     passwordHash = PasswordService.hashPassword(credentials.password),
-                    createdAt = Instant.now(),
-                    updatedAt = Instant.now(),
-                    walletBalance = 0.0
+                    walletBalance = 0.0,
                 )
             )
             call.respond(HttpStatusCode.OK)

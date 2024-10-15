@@ -13,19 +13,6 @@ CREATE TABLE users
     updated_at     TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE items
-(
-    id           SERIAL PRIMARY KEY,
-    user_id      INT REFERENCES users (id) ON DELETE CASCADE,
-    title        VARCHAR(255) NOT NULL,
-    description  TEXT,
-    total_amount INT,
-    category     VARCHAR(20),
-    image_url    VARCHAR(255),
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE bids
 (
     id               SERIAL PRIMARY KEY,
@@ -41,11 +28,18 @@ CREATE TABLE bids
     promotion_rating INT
 );
 
-CREATE TABLE items_in_bids
+CREATE TABLE items
 (
-    item_id INT REFERENCES items (id) ON DELETE CASCADE,
-    bid_id  INT REFERENCES bids (id) ON DELETE CASCADE,
-    amount  INT
+    id           SERIAL PRIMARY KEY,
+    user_id      INT REFERENCES users (id) ON DELETE CASCADE,
+    title        VARCHAR(255) NOT NULL,
+    description  TEXT,
+    total_amount INT,
+    category     VARCHAR(20),
+    image_url    VARCHAR(255),
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    bid_id       INT REFERENCES bids (id) ON DELETE SET NULL
 );
 
 CREATE TABLE messages
