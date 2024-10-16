@@ -1,22 +1,31 @@
 package com.orion.repository
 
+import com.orion.converter.toDto
 import com.orion.entity.Item
 import com.orion.form.ItemDto
+import com.orion.table.ItemTable
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
 class ItemRepository {
 
-    fun findAll(): List<Item> = transaction {
-        Item.all().toList()
+    fun findAllUserItems(userId: Int): List<ItemDto> = transaction {
+        val items = Item.find { ItemTable.userId eq userId}.toList()
+        return@transaction items.map { it.toDto() }
     }
 
-    fun findById(id: Int): Item? = transaction {
-        Item.findById(id)
+    fun findAll(): List<ItemDto> = transaction {
+        val items = Item.all().toList()
+        return@transaction items.map { it.toDto() }
     }
 
-    fun create(itemDto: ItemDto): Item = transaction {
-        Item.new {
+    fun findById(id: Int): ItemDto? = transaction {
+        val item = Item.findById(id)
+        return@transaction item?.toDto()
+    }
+
+    fun create(itemDto: ItemDto): ItemDto = transaction {
+        val item = Item.new {
             title = itemDto.title
             description = itemDto.description
             totalAmount = itemDto.totalAmount
@@ -25,6 +34,7 @@ class ItemRepository {
             createdAt = Instant.now()
             updatedAt = Instant.now()
         }
+        return@transaction item.toDto()
     }
 
     fun update(id: Int, itemDto: ItemDto): Boolean = transaction {

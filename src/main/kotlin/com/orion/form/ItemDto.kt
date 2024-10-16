@@ -5,9 +5,9 @@ import java.time.Instant
 data class ItemDto (
     val userId: Int,
     val title: String,
-    val description: String,
+    val description: String?,
     val totalAmount: Int,
-    val category: String,
+    val category: String?,
     //TODO emun
     val imageUrl: String? = null,
     val createdAt: Instant? = null,

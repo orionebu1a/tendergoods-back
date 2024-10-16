@@ -1,18 +1,22 @@
 package com.orion.service;
 
 import User
-import com.orion.converter.toDto
 import com.orion.form.UserDto
 import com.orion.repository.UserRepository
+import io.ktor.server.auth.*
 
 class UserService(private val userRepository: UserRepository) {
-    fun getAllUsers(): List<User> = userRepository.findAll()
+    fun getAllUsers(): List<UserDto> = userRepository.findAll()
 
-    fun getUserById(id: Int): User? = userRepository.findById(id)
+    fun getUserById(id: Int): UserDto? = userRepository.findById(id)
 
-    fun registerUser(user: UserDto): User = userRepository.create(user)
+    fun getPrincipalById(id: Int): User? = userRepository.findPrincipalById(id)
 
-    fun findByLogin(login: String): User = userRepository.findByLogin(login)
+    fun registerUser(user: UserDto): UserDto = userRepository.create(user)
+
+    fun findByLogin(login: String): UserDto? = userRepository.findByLogin(login)
+
+    fun findPrincipalByLogin(login: String): User? = userRepository.findPrincipalByLogin(login)
 
     fun updateUser(id: Int, user: UserDto): Boolean = userRepository.update(id, user)
 

@@ -1,13 +1,19 @@
 package com.orion
 
 import User
+import com.orion.api.bidRouting
+import com.orion.api.itemRouting
 import com.orion.api.userRouting
 import com.orion.form.UserDto
+import com.orion.repository.BidRepository
+import com.orion.repository.ItemRepository
 import com.orion.repository.UserRepository
 import com.orion.security.JwtConfig
 import com.orion.security.JwtConfig.verifier
 import com.orion.security.PasswordService
 import com.orion.serializer.InstantSerializer
+import com.orion.service.BidService
+import com.orion.service.ItemService
 import com.orion.service.UserService
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
@@ -50,6 +56,8 @@ fun Application.module() {
     )
 
     val userService = UserService(UserRepository())
+    val itemService = ItemService(ItemRepository())
+    val bidService = BidService(BidRepository())
 
     install(CallLogging)
     install(ContentNegotiation) {
@@ -67,7 +75,7 @@ fun Application.module() {
             verifier(verifier)
             realm = "ktor.io"
             validate {
-                it.payload.getClaim("id").asInt()?.let(userService::getUserById)
+                it.payload.getClaim("id").asInt()?.let(userService::getPrincipalById)
             }
         }
     }
@@ -78,8 +86,8 @@ fun Application.module() {
          */
         post("login") {
             val credentials = call.receive<UserPasswordCredential>()
-            val user = userService.findByLogin(credentials.name)
-            if (user != null) {
+            val user = userService.findPrincipalByLogin(credentials.name)
+            if (user != null && PasswordService.checkPassword(credentials.password, user.passwordHash)) {
                 call.respondText(JwtConfig.makeToken(user))
             } else {
                 call.respond(HttpStatusCode.BadRequest)
@@ -103,6 +111,8 @@ fun Application.module() {
          */
         authenticate {
             userRouting(userService)
+            bidRouting(bidService)
+            itemRouting(itemService)
         }
     }
 }

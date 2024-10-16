@@ -3,7 +3,7 @@ package com.orion.form
 import java.time.Instant
 
 data class BidDto (
-    val userId: Int,
+    var user: Int,
     val startingPrice: Double,
     val currentPrice: Double,
     val priceIncrement: Double,

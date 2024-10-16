@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.CurrentTimestamp
 import org.jetbrains.exposed.sql.javatime.timestamp
 object BidTable : IntIdTable("bids") {
-    val userId = reference("user_id", UserTable)
+    val user = reference("user_id", UserTable)
     val startingPrice = decimal("starting_price", 10, 2)
     val currentPrice = decimal("current_price", 10, 2)
     val priceIncrement = decimal("price_increment", 10, 2)

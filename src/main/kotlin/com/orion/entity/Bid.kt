@@ -1,5 +1,7 @@
 package com.orion.entity
 
+import User
+import UserTable
 import com.orion.table.BidTable
 import com.orion.table.ItemTable
 import org.jetbrains.exposed.dao.IntEntity
@@ -9,7 +11,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 class Bid(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Bid>(BidTable)
 
-    var userId by BidTable.userId
+    var user by User referencedOn BidTable.user
     var startingPrice by BidTable.startingPrice
     var currentPrice by BidTable.currentPrice
     var priceIncrement by BidTable.priceIncrement
@@ -19,5 +21,5 @@ class Bid(id: EntityID<Int>) : IntEntity(id) {
     var promotionRating by BidTable.promotionRating
     var createdAt by BidTable.createdAt
     var updatedAt by BidTable.updatedAt
-    val items by Item referrersOn ItemTable.id
+    val items by Item optionalReferrersOn ItemTable.bidId
 }

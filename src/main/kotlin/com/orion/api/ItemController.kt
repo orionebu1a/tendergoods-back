@@ -1,62 +1,64 @@
 package com.orion.api
 
 import com.orion.converter.toDto
+import com.orion.form.BidDto
+import com.orion.form.ItemDto
 import com.orion.form.UserDto
-import com.orion.service.UserService
+import com.orion.service.ItemService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-fun Route.userRouting(userService: UserService) {
-    route("/users") {
+fun Route.itemRouting(itemService: ItemService) {
+    route("/items") {
         get {
-            val users = userService.getAllUsers()
-            call.respond(users)
+            val items = itemService.getAllItems()
+            call.respond(items)
         }
 
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
-                val user = userService.getUserById(id)
-                if (user != null) {
-                    call.respond(user)
+                val item = itemService.getItemById(id)
+                if (item != null) {
+                    call.respond(item)
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
             } else {
-                call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+                call.respond(HttpStatusCode.BadRequest, "Invalid item ID")
             }
         }
 
-        post {
-            val user = call.receive<UserDto>()
-            val createdUser = userService.registerUser(user)
-            call.respond(HttpStatusCode.Created, createdUser)
+        post() {
+            val item = call.receive<ItemDto>()
+            val createdItem = itemService.createItem(item)
+            call.respond(HttpStatusCode.Created, createdItem)
         }
 
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            val user = call.receive<UserDto>()
+            val item = call.receive<ItemDto>()
             if (id != null) {
-                val updatedUser = userService.updateUser(id, user)
-                call.respond(updatedUser)
+                val updatedItem = itemService.updateItem(id, item)
+                call.respond(updatedItem)
             } else {
-                call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+                call.respond(HttpStatusCode.BadRequest, "Invalid item ID")
             }
         }
 
         delete("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
-                if (userService.deleteUser(id)) {
+                if (itemService.deleteItem(id)) {
                     call.respond(HttpStatusCode.NoContent)
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
             } else {
-                call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+                call.respond(HttpStatusCode.BadRequest, "Invalid item ID")
             }
         }
     }

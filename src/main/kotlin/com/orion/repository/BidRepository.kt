@@ -1,25 +1,37 @@
 package com.orion.repository
 
+import com.orion.converter.toDto
 import com.orion.entity.Bid
 import com.orion.entity.Item
 import com.orion.form.BidDto
 import com.orion.table.ItemTable
+import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
 class BidRepository {
-    fun findAll(): List<Bid> = transaction {
-        Bid.all().toList()
+    fun findAll(): List<BidDto> = transaction {
+        val bids = Bid.all().toList()
+        return@transaction bids.map { it.toDto() }
     }
 
-    fun findById(id: Int): Bid? = transaction {
-        Bid.findById(id)
+    fun findById(id: Int): BidDto? = transaction {
+        val bid = Bid.findById(id)
+        return@transaction bid?.toDto()
     }
 
-    fun create(bid: BidDto): Bid = transaction {
-        val items = Item.find { ItemTable.id inList bid.items }.toList()
-
+    fun create(bid: BidDto): BidDto = transaction {
+        var items: List<Item> = emptyList()
+        if (bid.items != null){
+            items = Item.find { ItemTable.id inList bid.items }.toList()
+        }
+        var foundUser = User.findById(bid.user)
+        if (foundUser == null) {
+            //TODO
+            //throw BadRequestException
+        }
         val newBid = Bid.new {
+            user = foundUser!!
             startingPrice = bid.startingPrice.toBigDecimal()
             currentPrice = bid.currentPrice.toBigDecimal()
             priceIncrement = bid.priceIncrement.toBigDecimal()
@@ -35,7 +47,7 @@ class BidRepository {
             item.bidId = newBid.id
         }
 
-        return@transaction newBid
+        return@transaction newBid.toDto()
     }
 
 

@@ -2,26 +2,38 @@ package com.orion.repository
 
 import User
 import UserTable
+import com.orion.converter.toDto
 import com.orion.form.UserDto
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
 class UserRepository {
 
-    fun findAll(): List<User> = transaction {
-        User.all().toList()
+    fun findAll(): List<UserDto> = transaction {
+        val user = User.all().toList()
+        return@transaction user.map { it.toDto() }
     }
 
-    fun findById(id: Int): User? = transaction {
+    fun findById(id: Int): UserDto? = transaction {
+        val user = User.findById(id)
+        return@transaction user?.toDto()
+    }
+
+    fun findPrincipalById(id: Int): User? = transaction {
         User.findById(id)
     }
 
-    fun findByLogin(login: String): User = transaction {
-        User.find { UserTable.email eq login }.toList().first()
+    fun findByLogin(login: String): UserDto? = transaction {
+        val user = User.find { UserTable.email eq login }.toList().firstOrNull()
+        return@transaction user?.toDto()
     }
 
-    fun create(userDto: UserDto): User = transaction {
-        User.new {
+    fun findPrincipalByLogin(login: String): User? = transaction {
+        User.find { UserTable.email eq login }.toList().firstOrNull()
+    }
+
+    fun create(userDto: UserDto): UserDto = transaction {
+        val user = User.new {
             email = userDto.email
             passwordHash = userDto.passwordHash
             firstName = userDto.firstName
@@ -33,6 +45,7 @@ class UserRepository {
             createdAt = Instant.now()
             updatedAt = Instant.now()
         }
+        return@transaction user.toDto()
     }
 
     fun update(id: Int, userDto: UserDto): Boolean = transaction {

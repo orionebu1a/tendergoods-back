@@ -20,9 +20,9 @@ CREATE TABLE bids
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     starting_price   DECIMAL(10, 2) NOT NULL,
-    current_price    DECIMAL(10, 2),
-    price_increment  DECIMAL(10, 2),
-    location         VARCHAR(255),
+    current_price    DECIMAL(10, 2) NOT NULL,
+    price_increment  DECIMAL(10, 2) NOT NULL,
+    location         VARCHAR(255)   NOT NULL,
     start_time       TIMESTAMP      NOT NULL,
     end_time         TIMESTAMP      NOT NULL,
     promotion_rating INT
@@ -32,14 +32,14 @@ CREATE TABLE items
 (
     id           SERIAL PRIMARY KEY,
     user_id      INT REFERENCES users (id) ON DELETE CASCADE,
-    title        VARCHAR(255) NOT NULL,
+    title        VARCHAR(255)                        NOT NULL,
     description  TEXT,
-    total_amount INT,
-    category     VARCHAR(20),
+    total_amount INT                                 NOT NULL,
+    category     VARCHAR(20)                         NOT NULL,
     image_url    VARCHAR(255),
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    bid_id       INT REFERENCES bids (id) ON DELETE SET NULL
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    bid_id       INT                                 REFERENCES bids (id) ON DELETE SET NULL
 );
 
 CREATE TABLE messages
@@ -48,8 +48,8 @@ CREATE TABLE messages
     sender_id    INT REFERENCES users (id) ON DELETE CASCADE,
     receiver_id  INT REFERENCES users (id) ON DELETE CASCADE,
     item_id      INT REFERENCES items (id) ON DELETE CASCADE,
-    message_text TEXT NOT NULL,
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    message_text TEXT                                NOT NULL,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE notifications
@@ -57,9 +57,9 @@ CREATE TABLE notifications
     id         SERIAL PRIMARY KEY,
     user_id    INT REFERENCES users (id) ON DELETE CASCADE,
     type       VARCHAR(20),
-    message    TEXT NOT NULL,
+    message    TEXT                                NOT NULL,
     is_read    BOOLEAN   DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE reviews
@@ -67,19 +67,19 @@ CREATE TABLE reviews
     id          SERIAL PRIMARY KEY,
     reviewer_id INT REFERENCES users (id) ON DELETE CASCADE,
     reviewee_id INT REFERENCES users (id) ON DELETE CASCADE,
-    rating      DECIMAL(2, 1) NOT NULL CHECK (rating BETWEEN 0 AND 5),
+    rating      DECIMAL(2, 1)                       NOT NULL CHECK (rating BETWEEN 0 AND 5),
     review_text TEXT,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE actions
 (
     id               SERIAL PRIMARY KEY,
     action_type      VARCHAR(20),
-    user_id          INT REFERENCES users (id) ON DELETE SET NULL,
-    item_id          INT REFERENCES items (id) ON DELETE SET NULL,
+    user_id          INT                                 REFERENCES users (id) ON DELETE SET NULL,
+    item_id          INT                                 REFERENCES items (id) ON DELETE SET NULL,
     item_category_id VARCHAR(20),
-    action_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    action_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE promotions
@@ -90,4 +90,12 @@ CREATE TABLE promotions
     bid_id         INT       REFERENCES items (id) ON DELETE SET NULL,
     start_time     TIMESTAMP NOT NULL,
     end_time       TIMESTAMP NOT NULL
+);
+
+CREATE TABLE money_transactions
+(
+    id               SERIAL PRIMARY KEY,
+    transaction_type VARCHAR(20),
+    user_id          INT REFERENCES users (id) ON DELETE SET NULL,
+    money            DECIMAL(10, 2) DEFAULT 0.0
 );
