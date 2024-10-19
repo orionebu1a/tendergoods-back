@@ -1,4 +1,3 @@
-import com.orion.entity.Bid
 import io.ktor.server.auth.*
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass

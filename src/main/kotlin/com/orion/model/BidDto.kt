@@ -1,9 +1,9 @@
-package com.orion.form
+package com.orion.model
 
 import java.time.Instant
 
 data class BidDto (
-    var user: Int,
+    var userId: Int,
     val startingPrice: Double,
     val currentPrice: Double,
     val priceIncrement: Double,
@@ -14,4 +14,15 @@ data class BidDto (
     val items: List<Int>,
     val createdAt: Instant? = null,
     val updatedAt: Instant? = null,
+)
+
+data class BidForm (
+    val startingPrice: Double,
+    val currentPrice: Double,
+    val priceIncrement: Double,
+    val location: String,
+    val startTime: Instant,
+    val endTime: Instant,
+    val promotionRating: Int? = null,
+    val items: List<Int>,
 )

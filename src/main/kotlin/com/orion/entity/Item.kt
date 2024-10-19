@@ -9,8 +9,8 @@ class Item(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Item>(ItemTable)
 
     var user by User referencedOn  UserTable.id
-    var bidId by ItemTable.bidId
-    var userId by ItemTable.userId
+    var bidId by ItemTable.bid
+    var userId by ItemTable.user
     var title by ItemTable.title
     var description by ItemTable.description
     var totalAmount by ItemTable.totalAmount

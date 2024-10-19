@@ -1,24 +1,75 @@
-package com.orion.service;
+package com.orion.service
 
 import User
-import com.orion.form.UserDto
-import com.orion.repository.UserRepository
-import io.ktor.server.auth.*
+import UserTable
+import com.orion.converter.toDto
+import com.orion.model.UserDto
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.Instant
 
-class UserService(private val userRepository: UserRepository) {
-    fun getAllUsers(): List<UserDto> = userRepository.findAll()
+class UserService {
+    fun findAll(): List<UserDto> = transaction {
+        val user = User.all().toList()
+        return@transaction user.map { it.toDto() }
+    }
 
-    fun getUserById(id: Int): UserDto? = userRepository.findById(id)
+    fun findById(id: Int): UserDto? = transaction {
+        val user = User.findById(id)
+        return@transaction user?.toDto()
+    }
 
-    fun getPrincipalById(id: Int): User? = userRepository.findPrincipalById(id)
+    fun findPrincipalById(id: Int): User? = transaction {
+        User.findById(id)
+    }
 
-    fun registerUser(user: UserDto): UserDto = userRepository.create(user)
+    fun findByLogin(login: String): UserDto? = transaction {
+        val user = User.find { UserTable.email eq login }.toList().firstOrNull()
+        return@transaction user?.toDto()
+    }
 
-    fun findByLogin(login: String): UserDto? = userRepository.findByLogin(login)
+    fun findPrincipalByLogin(login: String): User? = transaction {
+        User.find { UserTable.email eq login }.toList().firstOrNull()
+    }
 
-    fun findPrincipalByLogin(login: String): User? = userRepository.findPrincipalByLogin(login)
+    fun create(userDto: UserDto): UserDto = transaction {
+        val user = User.new {
+            email = userDto.email
+            passwordHash = userDto.passwordHash
+            firstName = userDto.firstName
+            lastName = userDto.lastName
+            age = userDto.age
+            gender = userDto.gender
+            rating = userDto.rating?.toBigDecimal()
+            walletBalance = userDto.walletBalance.toBigDecimal()
+            createdAt = Instant.now()
+            updatedAt = Instant.now()
+        }
+        return@transaction user.toDto()
+    }
 
-    fun updateUser(id: Int, user: UserDto): Boolean = userRepository.update(id, user)
+    fun update(id: Int, userDto: UserDto): Boolean = transaction {
+        val user = User.findById(id) ?: return@transaction false
 
-    fun deleteUser(id: Int): Boolean = userRepository.delete(id)
+        user.email = userDto.email
+        user.passwordHash = userDto.passwordHash
+        user.firstName = userDto.firstName
+        user.lastName = userDto.lastName
+        user.age = userDto.age
+        user.gender = userDto.gender
+        user.rating = userDto.rating?.toBigDecimal()
+        user.walletBalance = userDto.walletBalance.toBigDecimal()
+        user.updatedAt = Instant.now()
+
+        return@transaction true
+    }
+
+    fun delete(id: Int): Boolean = transaction {
+        val user = User.findById(id)
+        if (user == null) {
+            return@transaction false
+        } else {
+            user.delete()
+            return@transaction true
+        }
+    }
 }

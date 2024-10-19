@@ -1,4 +1,4 @@
-package com.orion.form
+package com.orion.model
 
 import java.time.Instant
 

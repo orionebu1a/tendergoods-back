@@ -1,7 +1,7 @@
 package com.orion.converter
 
 import com.orion.entity.Bid
-import com.orion.form.BidDto
+import com.orion.model.BidDto
 
 //fun BidDto.toModel(): Bid {
 //    return Bid.new {
@@ -21,7 +21,7 @@ import com.orion.form.BidDto
 
 fun Bid.toDto(): BidDto {
     return BidDto(
-        user = this.user.id.value,
+        userId = this.user.id.value,
         currentPrice = this.currentPrice.toDouble(),
         items = this.items.toList().map { it.id.value },
         endTime = this.endTime,

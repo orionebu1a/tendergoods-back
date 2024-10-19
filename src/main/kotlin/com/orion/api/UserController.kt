@@ -1,7 +1,6 @@
 package com.orion.api
 
-import com.orion.converter.toDto
-import com.orion.form.UserDto
+import com.orion.model.UserDto
 import com.orion.service.UserService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -12,14 +11,14 @@ import io.ktor.server.routing.*
 fun Route.userRouting(userService: UserService) {
     route("/users") {
         get {
-            val users = userService.getAllUsers()
+            val users = userService.findAll()
             call.respond(users)
         }
 
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
-                val user = userService.getUserById(id)
+                val user = userService.findById(id)
                 if (user != null) {
                     call.respond(user)
                 } else {
@@ -32,7 +31,7 @@ fun Route.userRouting(userService: UserService) {
 
         post {
             val user = call.receive<UserDto>()
-            val createdUser = userService.registerUser(user)
+            val createdUser = userService.create(user)
             call.respond(HttpStatusCode.Created, createdUser)
         }
 
@@ -40,7 +39,7 @@ fun Route.userRouting(userService: UserService) {
             val id = call.parameters["id"]?.toIntOrNull()
             val user = call.receive<UserDto>()
             if (id != null) {
-                val updatedUser = userService.updateUser(id, user)
+                val updatedUser = userService.update(id, user)
                 call.respond(updatedUser)
             } else {
                 call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
@@ -50,7 +49,7 @@ fun Route.userRouting(userService: UserService) {
         delete("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
-                if (userService.deleteUser(id)) {
+                if (userService.delete(id)) {
                     call.respond(HttpStatusCode.NoContent)
                 } else {
                     call.respond(HttpStatusCode.NotFound)

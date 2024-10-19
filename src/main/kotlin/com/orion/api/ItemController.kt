@@ -1,12 +1,11 @@
 package com.orion.api
 
-import com.orion.converter.toDto
-import com.orion.form.BidDto
-import com.orion.form.ItemDto
-import com.orion.form.UserDto
+import User
+import com.orion.model.ItemDto
 import com.orion.service.ItemService
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -14,14 +13,14 @@ import io.ktor.server.routing.*
 fun Route.itemRouting(itemService: ItemService) {
     route("/items") {
         get {
-            val items = itemService.getAllItems()
+            val items = itemService.findAll()
             call.respond(items)
         }
 
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
-                val item = itemService.getItemById(id)
+                val item = itemService.findById(id)
                 if (item != null) {
                     call.respond(item)
                 } else {
@@ -32,9 +31,20 @@ fun Route.itemRouting(itemService: ItemService) {
             }
         }
 
-        post() {
+        get("/ownedByUser/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id != null) {
+                val item = itemService.findAllUserItems(id)
+                call.respond(item)
+            } else {
+                call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+            }
+        }
+
+        post {
             val item = call.receive<ItemDto>()
-            val createdItem = itemService.createItem(item)
+            val principal = call.principal<User>()
+            val createdItem = itemService.create(item, principal!!)
             call.respond(HttpStatusCode.Created, createdItem)
         }
 
@@ -42,8 +52,12 @@ fun Route.itemRouting(itemService: ItemService) {
             val id = call.parameters["id"]?.toIntOrNull()
             val item = call.receive<ItemDto>()
             if (id != null) {
-                val updatedItem = itemService.updateItem(id, item)
-                call.respond(updatedItem)
+                val existing = itemService.findById(id)
+                val principal = call.principal<User>()
+                if (existing?.userId == principal?.id?.value) {
+                    val updatedItem = itemService.update(id, item)
+                    call.respond(updatedItem)
+                }
             } else {
                 call.respond(HttpStatusCode.BadRequest, "Invalid item ID")
             }
@@ -52,10 +66,14 @@ fun Route.itemRouting(itemService: ItemService) {
         delete("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {
-                if (itemService.deleteItem(id)) {
-                    call.respond(HttpStatusCode.NoContent)
-                } else {
-                    call.respond(HttpStatusCode.NotFound)
+                val existing = itemService.findById(id)
+                val principal = call.principal<User>()
+                if (existing?.userId == principal?.id?.value) {
+                    if (itemService.delete(id)) {
+                        call.respond(HttpStatusCode.NoContent)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
                 }
             } else {
                 call.respond(HttpStatusCode.BadRequest, "Invalid item ID")

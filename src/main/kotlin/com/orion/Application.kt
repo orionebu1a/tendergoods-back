@@ -4,17 +4,14 @@ import User
 import com.orion.api.bidRouting
 import com.orion.api.itemRouting
 import com.orion.api.userRouting
-import com.orion.form.UserDto
-import com.orion.repository.BidRepository
-import com.orion.repository.ItemRepository
-import com.orion.repository.UserRepository
+import com.orion.model.UserDto
+import com.orion.service.BidService
+import com.orion.service.ItemService
+import com.orion.service.UserService
 import com.orion.security.JwtConfig
 import com.orion.security.JwtConfig.verifier
 import com.orion.security.PasswordService
 import com.orion.serializer.InstantSerializer
-import com.orion.service.BidService
-import com.orion.service.ItemService
-import com.orion.service.UserService
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
@@ -55,9 +52,9 @@ fun Application.module() {
         password = dbPassword
     )
 
-    val userService = UserService(UserRepository())
-    val itemService = ItemService(ItemRepository())
-    val bidService = BidService(BidRepository())
+    val userService = UserService()
+    val itemService = ItemService()
+    val bidService = BidService()
 
     install(CallLogging)
     install(ContentNegotiation) {
@@ -75,7 +72,7 @@ fun Application.module() {
             verifier(verifier)
             realm = "ktor.io"
             validate {
-                it.payload.getClaim("id").asInt()?.let(userService::getPrincipalById)
+                it.payload.getClaim("id").asInt()?.let(userService::findPrincipalById)
             }
         }
     }
@@ -96,7 +93,7 @@ fun Application.module() {
 
         post("register") {
             val credentials = call.receive<UserPasswordCredential>()
-            userService.registerUser(
+            userService.create(
                 UserDto(
                     email = credentials.name,
                     passwordHash = PasswordService.hashPassword(credentials.password),

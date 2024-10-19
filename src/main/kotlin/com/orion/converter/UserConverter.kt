@@ -1,7 +1,7 @@
 package com.orion.converter
 
 import User
-import com.orion.form.UserDto
+import com.orion.model.UserDto
 
 fun UserDto.toModel(): User {
     return User.new {
