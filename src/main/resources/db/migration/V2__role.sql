@@ -8,8 +8,8 @@ CREATE TABLE item_category
 );
 
 ALTER TABLE items
-    drop column category,
-    add column category INT references item_category (id) ON DELETE SET NULL;
+    drop column category_id,
+    add column category_id INT references item_category (id) ON DELETE SET NULL;
 
 ALTER TABLE actions
     drop column item_category_id,

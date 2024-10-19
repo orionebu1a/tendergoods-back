@@ -5,6 +5,7 @@ import com.orion.model.ItemDto
 
 fun Item.toDto(): ItemDto {
     return ItemDto(
+        id = this.id.value,
         categoryId = this.category.value,
         description = this.description,
         title = this.title,

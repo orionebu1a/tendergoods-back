@@ -5,6 +5,7 @@ import com.orion.api.bidRouting
 import com.orion.api.itemRouting
 import com.orion.api.userRouting
 import com.orion.model.UserDto
+import com.orion.model.UserForm
 import com.orion.service.BidService
 import com.orion.service.ItemService
 import com.orion.service.UserService
@@ -94,7 +95,7 @@ fun Application.module() {
         post("register") {
             val credentials = call.receive<UserPasswordCredential>()
             userService.create(
-                UserDto(
+                UserForm(
                     email = credentials.name,
                     passwordHash = PasswordService.hashPassword(credentials.password),
                     walletBalance = 0.0,

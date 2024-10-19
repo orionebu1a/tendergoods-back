@@ -20,6 +20,7 @@ fun UserDto.toModel(): User {
 
 fun User.toDto(): UserDto {
     return UserDto(
+        id = this.id.value,
         email = this.email,
         passwordHash = this.passwordHash,
         firstName = this.firstName,

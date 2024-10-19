@@ -1,6 +1,7 @@
 package com.orion.api
 
 import com.orion.model.UserDto
+import com.orion.model.UserForm
 import com.orion.service.UserService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -30,14 +31,14 @@ fun Route.userRouting(userService: UserService) {
         }
 
         post {
-            val user = call.receive<UserDto>()
+            val user = call.receive<UserForm>()
             val createdUser = userService.create(user)
             call.respond(HttpStatusCode.Created, createdUser)
         }
 
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            val user = call.receive<UserDto>()
+            val user = call.receive<UserForm>()
             if (id != null) {
                 val updatedUser = userService.update(id, user)
                 call.respond(updatedUser)

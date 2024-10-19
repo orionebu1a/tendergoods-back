@@ -2,6 +2,7 @@ package com.orion.api
 
 import User
 import com.orion.model.ItemDto
+import com.orion.model.ItemForm
 import com.orion.service.ItemService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -42,7 +43,7 @@ fun Route.itemRouting(itemService: ItemService) {
         }
 
         post {
-            val item = call.receive<ItemDto>()
+            val item = call.receive<ItemForm>()
             val principal = call.principal<User>()
             val createdItem = itemService.create(item, principal!!)
             call.respond(HttpStatusCode.Created, createdItem)
@@ -50,7 +51,7 @@ fun Route.itemRouting(itemService: ItemService) {
 
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            val item = call.receive<ItemDto>()
+            val item = call.receive<ItemForm>()
             if (id != null) {
                 val existing = itemService.findById(id)
                 val principal = call.principal<User>()

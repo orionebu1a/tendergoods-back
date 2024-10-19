@@ -5,6 +5,7 @@ import com.orion.converter.toDto
 import com.orion.entity.Item
 import com.orion.entity.ItemCategory
 import com.orion.model.ItemDto
+import com.orion.model.ItemForm
 import com.orion.table.ItemTable
 import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -26,7 +27,7 @@ class ItemService {
         return@transaction item?.toDto()
     }
 
-    fun create(itemDto: ItemDto, principal: User): ItemDto = transaction {
+    fun create(itemDto: ItemForm, principal: User): ItemDto = transaction {
         val itemCategory = ItemCategory.findById(itemDto.categoryId)
             ?: throw NotFoundException("Category not found")
 
@@ -43,7 +44,7 @@ class ItemService {
         return@transaction item.toDto()
     }
 
-    fun update(id: Int, itemDto: ItemDto): Boolean = transaction {
+    fun update(id: Int, itemDto: ItemForm): Boolean = transaction {
         val itemCategory = ItemCategory.findById(itemDto.categoryId)
             ?: throw NotFoundException("Category not found")
 

@@ -4,6 +4,7 @@ import User
 import UserTable
 import com.orion.converter.toDto
 import com.orion.model.UserDto
+import com.orion.model.UserForm
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
@@ -31,7 +32,7 @@ class UserService {
         User.find { UserTable.email eq login }.toList().firstOrNull()
     }
 
-    fun create(userDto: UserDto): UserDto = transaction {
+    fun create(userDto: UserForm): UserDto = transaction {
         val user = User.new {
             email = userDto.email
             passwordHash = userDto.passwordHash
@@ -47,7 +48,7 @@ class UserService {
         return@transaction user.toDto()
     }
 
-    fun update(id: Int, userDto: UserDto): Boolean = transaction {
+    fun update(id: Int, userDto: UserForm): Boolean = transaction {
         val user = User.findById(id) ?: return@transaction false
 
         user.email = userDto.email

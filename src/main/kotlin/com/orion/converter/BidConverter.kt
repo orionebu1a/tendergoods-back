@@ -3,24 +3,9 @@ package com.orion.converter
 import com.orion.entity.Bid
 import com.orion.model.BidDto
 
-//fun BidDto.toModel(): Bid {
-//    return Bid.new {
-//        user = this@toModel.userId
-//        currentPrice = this@toModel.currentPrice.toBigDecimal()
-//        items = this@toModel.items
-//        endTime = this@toModel.endTime
-//        location = this@toModel.location
-//        priceIncrement = this@toModel.priceIncrement.toBigDecimal()
-//        startingPrice = this@toModel.startingPrice.toBigDecimal()
-//        startTime = this@toModel.startTime
-//        createdAt = this@toModel.createdAt!!
-//        updatedAt = this@toModel.updatedAt!!
-//    }
-//}
-//TODO
-
 fun Bid.toDto(): BidDto {
     return BidDto(
+        id = this.id.value,
         userId = this.user.id.value,
         currentPrice = this.currentPrice.toDouble(),
         items = this.items.toList().map { it.id.value },
