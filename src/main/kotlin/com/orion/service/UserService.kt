@@ -40,8 +40,8 @@ class UserService {
             lastName = userDto.lastName
             age = userDto.age
             gender = userDto.gender
-            rating = userDto.rating?.toBigDecimal()
-            walletBalance = userDto.walletBalance.toBigDecimal()
+            rating = userDto.rating
+            walletBalance = userDto.walletBalance
             createdAt = Instant.now()
             updatedAt = Instant.now()
         }
@@ -57,8 +57,8 @@ class UserService {
         user.lastName = userDto.lastName
         user.age = userDto.age
         user.gender = userDto.gender
-        user.rating = userDto.rating?.toBigDecimal()
-        user.walletBalance = userDto.walletBalance.toBigDecimal()
+        user.rating = userDto.rating
+        user.walletBalance = userDto.walletBalance
         user.updatedAt = Instant.now()
 
         return@transaction true

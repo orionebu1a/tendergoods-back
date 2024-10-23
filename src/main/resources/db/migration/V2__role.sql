@@ -8,9 +8,9 @@ CREATE TABLE item_category
 );
 
 ALTER TABLE items
-    drop column category_id,
+    drop column if exists category,
     add column category_id INT references item_category (id) ON DELETE SET NULL;
 
 ALTER TABLE actions
-    drop column item_category_id,
+    drop column if exists item_category_id,
     add column item_category_id INT references item_category (id) ON DELETE SET NULL;

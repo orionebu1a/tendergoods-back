@@ -7,10 +7,10 @@ CREATE TABLE users
     last_name      VARCHAR(100),
     age            INT,
     gender         VARCHAR(10),
-    rating         DECIMAL(3, 2)  DEFAULT 0.0,
-    wallet_balance DECIMAL(10, 2) DEFAULT 0.0,
-    created_at     TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
+    rating         DOUBLE PRECISION DEFAULT 0.0,
+    wallet_balance DOUBLE PRECISION DEFAULT 0.0,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE bids
@@ -19,12 +19,12 @@ CREATE TABLE bids
     user_id          INT REFERENCES users (id) ON DELETE CASCADE,
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    starting_price   DECIMAL(10, 2) NOT NULL,
-    current_price    DECIMAL(10, 2) NOT NULL,
-    price_increment  DECIMAL(10, 2) NOT NULL,
-    location         VARCHAR(255)   NOT NULL,
-    start_time       TIMESTAMP      NOT NULL,
-    end_time         TIMESTAMP      NOT NULL,
+    starting_price   DOUBLE PRECISION NOT NULL,
+    current_price    DOUBLE PRECISION NOT NULL,
+    price_increment  DOUBLE PRECISION NOT NULL,
+    location         VARCHAR(255) NOT NULL,
+    start_time       TIMESTAMP NOT NULL,
+    end_time         TIMESTAMP NOT NULL,
     promotion_rating INT
 );
 
@@ -67,7 +67,7 @@ CREATE TABLE reviews
     id          SERIAL PRIMARY KEY,
     reviewer_id INT REFERENCES users (id) ON DELETE CASCADE,
     reviewee_id INT REFERENCES users (id) ON DELETE CASCADE,
-    rating      DECIMAL(2, 1)                       NOT NULL CHECK (rating BETWEEN 0 AND 5),
+    rating      DOUBLE PRECISION NOT NULL CHECK (rating BETWEEN 0 AND 5),
     review_text TEXT,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -76,8 +76,8 @@ CREATE TABLE actions
 (
     id               SERIAL PRIMARY KEY,
     action_type      VARCHAR(20),
-    user_id          INT                                 REFERENCES users (id) ON DELETE SET NULL,
-    item_id          INT                                 REFERENCES items (id) ON DELETE SET NULL,
+    user_id          INT REFERENCES users (id) ON DELETE SET NULL,
+    item_id          INT REFERENCES items (id) ON DELETE SET NULL,
     item_category_id VARCHAR(20),
     action_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -86,8 +86,8 @@ CREATE TABLE promotions
 (
     id             SERIAL PRIMARY KEY,
     promotion_type VARCHAR(20),
-    user_id        INT       REFERENCES users (id) ON DELETE SET NULL,
-    bid_id         INT       REFERENCES items (id) ON DELETE SET NULL,
+    user_id        INT REFERENCES users (id) ON DELETE SET NULL,
+    bid_id         INT REFERENCES items (id) ON DELETE SET NULL,
     start_time     TIMESTAMP NOT NULL,
     end_time       TIMESTAMP NOT NULL
 );
@@ -97,5 +97,5 @@ CREATE TABLE money_transactions
     id               SERIAL PRIMARY KEY,
     transaction_type VARCHAR(20),
     user_id          INT REFERENCES users (id) ON DELETE SET NULL,
-    money            DECIMAL(10, 2) DEFAULT 0.0
+    money            DOUBLE PRECISION DEFAULT 0.0
 );

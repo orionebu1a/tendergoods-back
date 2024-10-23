@@ -13,11 +13,6 @@ import io.ktor.server.routing.*
 
 fun Route.itemRouting(itemService: ItemService) {
     route("/items") {
-        get {
-            val items = itemService.findAll()
-            call.respond(items)
-        }
-
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id != null) {

@@ -6,9 +6,9 @@ import org.jetbrains.exposed.sql.javatime.CurrentTimestamp
 import org.jetbrains.exposed.sql.javatime.timestamp
 object BidTable : IntIdTable("bids") {
     val user = reference("user_id", UserTable)
-    val startingPrice = decimal("starting_price", 10, 2)
-    val currentPrice = decimal("current_price", 10, 2)
-    val priceIncrement = decimal("price_increment", 10, 2)
+    val startingPrice = double("starting_price")
+    val currentPrice = double("current_price")
+    val priceIncrement = double("price_increment")
     val location = varchar("location", 255)
     val startTime = timestamp("start_time")
     val endTime = timestamp("end_time")

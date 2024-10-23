@@ -2,7 +2,10 @@ package com.orion.filter
 
 import java.time.Instant
 
-data class BidFilter (
+data class BidItemFilter (
+    val from: Int,
+    val to: Int,
+
     val itemCategory: Int?,
     val startingPrice: Double?,
     val currentPrice: Double?,
@@ -10,5 +13,4 @@ data class BidFilter (
     val location: String?,
     val startTime: Instant?,
     val endTime: Instant?,
-    //TODO category enum
 )

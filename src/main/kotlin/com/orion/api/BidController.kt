@@ -1,6 +1,7 @@
 package com.orion.api
 
 import User
+import com.orion.filter.BidPageFilter
 import com.orion.model.BidForm
 import com.orion.service.BidService
 import io.ktor.http.*
@@ -14,6 +15,12 @@ fun Route.bidRouting(bidService: BidService) {
     route("/bids") {
         get {
             val bids = bidService.findAll()
+            call.respond(bids)
+        }
+
+        get("paged") {
+            val bidPageFilter = call.receive<BidPageFilter>()
+            val bids = bidService.findPagedByFilter(bidPageFilter)
             call.respond(bids)
         }
 

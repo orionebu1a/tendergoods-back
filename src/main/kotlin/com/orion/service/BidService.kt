@@ -4,12 +4,13 @@ import User
 import com.orion.converter.toDto
 import com.orion.entity.Bid
 import com.orion.entity.Item
-import com.orion.filter.BidFilter
+import com.orion.filter.BidPageFilter
 import com.orion.model.BidDto
 import com.orion.model.BidForm
 import com.orion.table.BidTable
 import com.orion.table.ItemTable
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.math.BigDecimal
 import java.time.Instant
 
 class BidService {
@@ -18,13 +19,18 @@ class BidService {
         return@transaction bids.map { it.toDto() }
     }
 
-    fun findAllByFilter(filter: BidFilter): List<BidDto> = transaction {
+    fun findPagedByFilter(filter: BidPageFilter): List<BidDto> = transaction {
         val matchingItems = Item.find { ItemTable.category eq filter.itemCategory }.toList()
 
         val bidsWithMatchingItems = matchingItems.mapNotNull { it.bidId?.value }.distinct()
 
         val bids = if (bidsWithMatchingItems.isNotEmpty()) {
-            Bid.find { BidTable.id inList bidsWithMatchingItems }.toList()
+            Bid.find {
+                BidTable.id inList bidsWithMatchingItems
+//                BidTable.startingPrice lessEq filter.startingPriceTo ?: Double.MAX_VALUE
+                //TODO
+
+            }.toList()
         } else {
             emptyList()
         }
@@ -42,9 +48,9 @@ class BidService {
         val itemsFound = Item.find { ItemTable.id inList bid.items }.toList()
         val newBid = Bid.new {
             user = principal
-            startingPrice = bid.startingPrice.toBigDecimal()
-            currentPrice = bid.currentPrice.toBigDecimal()
-            priceIncrement = bid.priceIncrement.toBigDecimal()
+            startingPrice = bid.startingPrice
+            currentPrice = bid.currentPrice
+            priceIncrement = bid.priceIncrement
             location = bid.location
             startTime = bid.startTime
             endTime = bid.endTime
@@ -66,9 +72,9 @@ class BidService {
 
         val oldBid = Bid.findById(id) ?: return@transaction false
 
-        oldBid.startingPrice = bid.startingPrice.toBigDecimal()
-        oldBid.currentPrice = bid.currentPrice.toBigDecimal()
-        oldBid.priceIncrement = bid.priceIncrement.toBigDecimal()
+        oldBid.startingPrice = bid.startingPrice
+        oldBid.currentPrice = bid.currentPrice
+        oldBid.priceIncrement = bid.priceIncrement
         oldBid.location = bid.location
         oldBid.startTime = bid.startTime
         oldBid.endTime = bid.endTime

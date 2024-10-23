@@ -11,8 +11,8 @@ fun UserDto.toModel(): User {
         lastName = this@toModel.lastName
         age = this@toModel.age
         gender = this@toModel.gender
-        rating = this@toModel.rating?.toBigDecimal()
-        walletBalance = this@toModel.walletBalance.toBigDecimal()
+        rating = this@toModel.rating
+        walletBalance = this@toModel.walletBalance
         createdAt = this@toModel.createdAt!!
         updatedAt = this@toModel.updatedAt!!
     }
