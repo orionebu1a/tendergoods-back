@@ -27,7 +27,14 @@ class BidService {
     }
 
     fun findPagedByFilter(filter: BidPageFilter): List<BidDto> = transaction {
-        val matchingItems = Item.find { ItemTable.category eq filter.itemCategory }.toList()
+        val matchingItems = Item.find { filter.itemCategories.let {
+            if (it == null) {
+                return@let Op.TRUE
+            }
+            else {
+                return@let ItemTable.category inList filter.itemCategories!!
+            }
+        } }.toList()
         val bidsWithMatchingItems = matchingItems.mapNotNull { it.bidId?.value }.distinct()
 
         val stateCondition = when (filter.state) {
@@ -36,22 +43,32 @@ class BidService {
             BidState.OVER -> BidTable.endTime less Instant.now()
             BidState.FUTURE -> BidTable.startTime greater Instant.now()
         }
-
-        val bids = if (bidsWithMatchingItems.isNotEmpty()) {
+        val bids =
             Bid.find {
-                (BidTable.id inList bidsWithMatchingItems) and
+                filter.itemCategories.let {
+                    if (it != null) {
+                        return@let BidTable.id inList bidsWithMatchingItems
+                    }
+                    else {
+                        return@let Op.TRUE
+                    }
+                } and
                 (BidTable.startingPrice lessEq (filter.startingPriceTo ?: Double.MAX_VALUE)) and
                 (BidTable.startingPrice greaterEq (filter.startingPriceFrom ?: Double.MIN_VALUE)) and
                 (BidTable.priceIncrement lessEq (filter.priceIncrementTo ?: Double.MAX_VALUE)) and
                 (BidTable.priceIncrement greaterEq (filter.priceIncrementFrom ?: Double.MIN_VALUE)) and
                 (BidTable.currentPrice lessEq (filter.currentPriceTo ?: Double.MAX_VALUE)) and
                 (BidTable.currentPrice greaterEq (filter.currentPriceFrom ?: Double.MIN_VALUE)) and
-                (BidTable.location inList filter.locations) and
+                filter.locations.let {
+                    if (filter.locations != null) {
+                        return@let BidTable.location inList filter.locations
+                    }
+                    else {
+                        return@let Op.TRUE
+                    }
+                } and
                 stateCondition
             }.toList()
-        } else {
-            emptyList()
-        }
 
         return@transaction bids
             .filter {
