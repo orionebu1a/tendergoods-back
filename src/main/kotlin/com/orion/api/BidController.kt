@@ -1,6 +1,5 @@
-package com.orion.api
-
-import User
+import com.orion.errors.ResultWithError
+import com.orion.errors.ServiceError
 import com.orion.filter.BidPageFilter
 import com.orion.model.BidForm
 import com.orion.service.BidService
@@ -13,10 +12,6 @@ import io.ktor.server.routing.*
 
 fun Route.bidRouting(bidService: BidService) {
     route("/bids") {
-        get {
-            val bids = bidService.findAll()
-            call.respond(bids)
-        }
 
         get("paged") {
             val bidPageFilter = call.receive<BidPageFilter>()
@@ -26,61 +21,90 @@ fun Route.bidRouting(bidService: BidService) {
 
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
-                val bid = bidService.findById(id)
-                if (bid != null) {
-                    call.respond(bid)
-                } else {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-            } else {
+            if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid bid ID")
+                return@get
+            }
+
+            when (val result = bidService.findById(id)) {
+                is ResultWithError.Success -> call.respond(result.data)
+                is ResultWithError.Failure -> {
+                    when (val error = result.error) {
+                        ServiceError.NotFound -> call.respond(HttpStatusCode.NotFound, error.message)
+                        is ServiceError.DatabaseError -> call.respond(HttpStatusCode.InternalServerError, error.message)
+                        else -> call.respond(HttpStatusCode.BadRequest, error.message)
+                    }
+                }
             }
         }
 
         post {
             val bid = call.receive<BidForm>()
-            val principal = call.principal<User>()
-            val createdBid = bidService.create(bid, principal!!)
-            call.respond(HttpStatusCode.Created, createdBid)
+
+            when (val result = bidService.create(bid, call.principal<User>()!!)) {
+                is ResultWithError.Success -> call.respond(HttpStatusCode.Created, result.data)
+                is ResultWithError.Failure -> {
+                    val error = result.error
+                    call.respond(
+                        when (error) {
+                            is ServiceError.DatabaseError -> HttpStatusCode.InternalServerError
+                            else -> HttpStatusCode.BadRequest
+                        },
+                        error.message
+                    )
+                }
+            }
         }
 
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            val bid = call.receive<BidForm>()
-            if (id != null) {
-                val existing = bidService.findById(id)
-                val principal = call.principal<User>()
-                if (existing?.userId == principal?.id?.value) {
-                    val updatedBid = bidService.update(id, bid)
-                    call.respond(updatedBid)
-                }
-                else {
-                    call.respond(HttpStatusCode.BadRequest, "Impossible to update bid you are not own")
-                }
-            } else {
+            if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid bid ID")
+                return@put
+            }
+
+            val bidForm = call.receive<BidForm>()
+
+            when (val result = bidService.update(id, bidForm, call.principal<User>()!!)) {
+                is ResultWithError.Success -> call.respond(HttpStatusCode.OK, result.data)
+                is ResultWithError.Failure -> {
+                    val error = result.error
+                    when (error) {
+                        ServiceError.NotFound -> call.respond(HttpStatusCode.NotFound, error.message)
+                        ServiceError.NotOwn -> call.respond(HttpStatusCode.Forbidden, error.message)
+                        is ServiceError.DatabaseError -> call.respond(HttpStatusCode.InternalServerError, error.message)
+                        else -> call.respond(HttpStatusCode.BadRequest, error.message)
+                    }
+                }
             }
         }
 
         delete("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            if (id != null) {
-                val bid = bidService.findById(id)
-                val principal = call.principal<User>()
-                if (bid?.userId == principal?.id?.value) {
-                    if (bidService.delete(id)) {
-                        call.respond(HttpStatusCode.NoContent)
-                    } else {
-                        call.respond(HttpStatusCode.NotFound)
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid bid ID")
+                return@delete
+            }
+
+            val principal = call.principal<User>()
+            if (principal == null) {
+                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+                return@delete
+            }
+
+            when (val result = bidService.delete(id, principal)) {
+                is ResultWithError.Success -> call.respond(HttpStatusCode.NoContent)
+                is ResultWithError.Failure -> {
+                    val error = result.error
+                    when (error) {
+                        ServiceError.NotFound -> call.respond(HttpStatusCode.NotFound, error.message)
+                        ServiceError.NotOwn -> call.respond(HttpStatusCode.Forbidden, error.message)
+                        is ServiceError.DatabaseError -> call.respond(HttpStatusCode.InternalServerError, error.message)
+                        else -> call.respond(HttpStatusCode.BadRequest, error.message)
                     }
                 }
-                else{
-                    call.respond(HttpStatusCode.BadRequest, "Impossible to delete bid you are not own")
-                }
-            } else {
-                call.respond(HttpStatusCode.BadRequest, "Invalid bid ID")
             }
         }
+
     }
 }

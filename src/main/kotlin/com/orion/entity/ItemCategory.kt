@@ -8,5 +8,5 @@ import org.jetbrains.exposed.dao.id.EntityID
 class ItemCategory(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ItemCategory>(ItemCategoryTable)
 
-    var name by ItemCategoryTable.name
+    val name by ItemCategoryTable.name
 }

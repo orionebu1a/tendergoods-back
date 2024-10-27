@@ -5,6 +5,8 @@ import com.orion.converter.toDto
 import com.orion.entity.Bid
 import com.orion.entity.Item
 import com.orion.enums.BidState
+import com.orion.errors.ResultWithError
+import com.orion.errors.ServiceError
 import com.orion.filter.BidPageFilter
 import com.orion.model.BidDto
 import com.orion.model.BidForm
@@ -21,10 +23,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
 class BidService {
-    fun findAll(): List<BidDto> = transaction {
-        val bids = Bid.all().toList()
-        return@transaction bids.map { it.toDto() }
-    }
 
     fun findPagedByFilter(filter: BidPageFilter): List<BidDto> = transaction {
         val matchingItems = Item.find { filter.itemCategories.let {
@@ -53,21 +51,21 @@ class BidService {
                         return@let Op.TRUE
                     }
                 } and
-                (BidTable.startingPrice lessEq (filter.startingPriceTo ?: Double.MAX_VALUE)) and
-                (BidTable.startingPrice greaterEq (filter.startingPriceFrom ?: Double.MIN_VALUE)) and
-                (BidTable.priceIncrement lessEq (filter.priceIncrementTo ?: Double.MAX_VALUE)) and
-                (BidTable.priceIncrement greaterEq (filter.priceIncrementFrom ?: Double.MIN_VALUE)) and
-                (BidTable.currentPrice lessEq (filter.currentPriceTo ?: Double.MAX_VALUE)) and
-                (BidTable.currentPrice greaterEq (filter.currentPriceFrom ?: Double.MIN_VALUE)) and
-                filter.locations.let {
-                    if (filter.locations != null) {
-                        return@let BidTable.location inList filter.locations
-                    }
-                    else {
-                        return@let Op.TRUE
-                    }
-                } and
-                stateCondition
+                        (BidTable.startingPrice lessEq (filter.startingPriceTo ?: Double.MAX_VALUE)) and
+                        (BidTable.startingPrice greaterEq (filter.startingPriceFrom ?: Double.MIN_VALUE)) and
+                        (BidTable.priceIncrement lessEq (filter.priceIncrementTo ?: Double.MAX_VALUE)) and
+                        (BidTable.priceIncrement greaterEq (filter.priceIncrementFrom ?: Double.MIN_VALUE)) and
+                        (BidTable.currentPrice lessEq (filter.currentPriceTo ?: Double.MAX_VALUE)) and
+                        (BidTable.currentPrice greaterEq (filter.currentPriceFrom ?: Double.MIN_VALUE)) and
+                        filter.locations.let {
+                            if (filter.locations != null) {
+                                return@let BidTable.location inList filter.locations
+                            }
+                            else {
+                                return@let Op.TRUE
+                            }
+                        } and
+                        stateCondition
             }.toList()
 
         return@transaction bids
@@ -82,74 +80,72 @@ class BidService {
             .map { it.toDto() }
     }
 
-
-    fun findById(id: Int): BidDto? = transaction {
-        val bid = Bid.findById(id)
-        return@transaction bid?.toDto()
+    fun findById(id: Int): ResultWithError<BidDto> = transaction {
+        val bid = Bid.findById(id) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
+        ResultWithError.Success(bid.toDto())
     }
 
-    fun create(bid: BidForm, principal: User): BidDto = transaction {
-        val itemsFound = Item.find { ItemTable.id inList bid.items }.toList()
-        val newBid = Bid.new {
-            user = principal
-            startingPrice = bid.startingPrice
-            currentPrice = bid.startingPrice
-            priceIncrement = bid.priceIncrement
-            latitude = bid.latitude
-            longitude = bid.longitude
-            location = bid.location
-            startTime = bid.startTime
-            endTime = bid.endTime
-            promotionRating = bid.promotionRating ?: 0
-            createdAt = Instant.now()
-            updatedAt = Instant.now()
-        }
-
-        for (item in itemsFound){
-            item.bidId = newBid.id
-        }
-
-        return@transaction newBid.toDto()
-    }
-
-
-    fun update(id: Int, bid: BidForm): Boolean = transaction {
-        val items = Item.find { ItemTable.id inList bid.items }.toList()
-
-        val oldBid = Bid.findById(id) ?: return@transaction false
-
-        oldBid.startingPrice = bid.startingPrice
-        oldBid.priceIncrement = bid.priceIncrement
-        oldBid.latitude = bid.latitude
-        oldBid.longitude = bid.longitude
-        oldBid.location = bid.location
-        oldBid.startTime = bid.startTime
-        oldBid.endTime = bid.endTime
-        oldBid.promotionRating = bid.promotionRating ?: 0
-        oldBid.updatedAt = Instant.now()
-
-        for (item in items){
-            item.bidId = oldBid.id
-        }
-
-        for (oldItem in oldBid.items){
-            if (!items.contains(oldItem)) {
-                oldItem.bidId = null
+    fun create(bid: BidForm, principal: User): ResultWithError<BidDto> = transaction {
+        try {
+            val itemsFound = Item.find { ItemTable.id inList bid.items }.toList()
+            val newBid = Bid.new {
+                user = principal
+                startingPrice = bid.startingPrice
+                currentPrice = bid.startingPrice
+                priceIncrement = bid.priceIncrement
+                latitude = bid.latitude
+                longitude = bid.longitude
+                location = bid.location
+                startTime = bid.startTime
+                endTime = bid.endTime
+                promotionRating = bid.promotionRating ?: 0
+                createdAt = Instant.now()
+                updatedAt = Instant.now()
             }
-        }
+            itemsFound.forEach { it.bidId = newBid.id }
 
-        return@transaction true
-    }
-
-    fun delete(id: Int): Boolean = transaction {
-        val oldBid = Bid.findById(id)
-        if (oldBid == null) {
-            return@transaction false
-        }
-        else {
-            oldBid.delete()
-            return@transaction true
+            ResultWithError.Success(newBid.toDto())
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Unknown error"))
         }
     }
 
+    fun update(id: Int, bid: BidForm, user: User): ResultWithError<BidDto> = transaction {
+        val oldBid = Bid.findById(id) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
+
+        if (oldBid.user.id.value != user.id.value) {
+            return@transaction ResultWithError.Failure(ServiceError.NotOwn)
+        }
+
+        try {
+            oldBid.apply {
+                startingPrice = bid.startingPrice
+                priceIncrement = bid.priceIncrement
+                latitude = bid.latitude
+                longitude = bid.longitude
+                location = bid.location
+                startTime = bid.startTime
+                endTime = bid.endTime
+                promotionRating = bid.promotionRating ?: 0
+                updatedAt = Instant.now()
+            }
+            ResultWithError.Success(oldBid.toDto())
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Update failed"))
+        }
+    }
+
+    fun delete(id: Int, user: User): ResultWithError<Unit> = transaction {
+        val bid = Bid.findById(id) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
+
+        if (bid.user.id.value != user.id.value) {
+            return@transaction ResultWithError.Failure(ServiceError.NotOwn)
+        }
+        try {
+            bid.delete()
+            ResultWithError.Success(Unit)
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Delete failed"))
+        }
+    }
 }

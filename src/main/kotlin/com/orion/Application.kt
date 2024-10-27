@@ -1,17 +1,17 @@
 package com.orion
 
 import User
-import com.orion.api.bidRouting
+import bidRouting
 import com.orion.api.itemRouting
 import com.orion.api.userRouting
 import com.orion.model.UserForm
-import com.orion.service.BidService
-import com.orion.service.ItemService
-import com.orion.service.UserService
 import com.orion.security.JwtConfig
 import com.orion.security.JwtConfig.verifier
 import com.orion.security.PasswordService
 import com.orion.serializer.InstantSerializer
+import com.orion.service.BidService
+import com.orion.service.ItemService
+import com.orion.service.UserService
 import io.ktor.http.*
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
@@ -75,6 +75,7 @@ fun Application.module() {
                 it.payload.getClaim("id").asInt()?.let(userService::findPrincipalById)
             }
         }
+
     }
 
     install(Routing) {

@@ -4,69 +4,96 @@ import User
 import com.orion.converter.toDto
 import com.orion.entity.Item
 import com.orion.entity.ItemCategory
+import com.orion.errors.ResultWithError
+import com.orion.errors.ServiceError
 import com.orion.model.ItemDto
 import com.orion.model.ItemForm
 import com.orion.table.ItemTable
-import io.ktor.server.plugins.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
 class ItemService {
-    fun findAllUserItems(userId: Int): List<ItemDto> = transaction {
-        val items = Item.find { ItemTable.user eq userId}.toList()
-        return@transaction items.map { it.toDto() }
-    }
-
-    fun findAll(): List<ItemDto> = transaction {
-        val items = Item.all().toList()
-        return@transaction items.map { it.toDto() }
-    }
-
-    fun findById(id: Int): ItemDto? = transaction {
-        val item = Item.findById(id)
-        return@transaction item?.toDto()
-    }
-
-    fun create(itemDto: ItemForm, principal: User): ItemDto = transaction {
-        val itemCategory = ItemCategory.findById(itemDto.categoryId)
-            ?: throw NotFoundException("Category not found")
-
-        val item = Item.new {
-            user = principal
-            title = itemDto.title
-            description = itemDto.description
-            totalAmount = itemDto.totalAmount
-            category = itemCategory.id
-            imageUrl = itemDto.imageUrl
-            createdAt = Instant.now()
-            updatedAt = Instant.now()
+    fun findAllUserItems(userId: Int): ResultWithError<List<ItemDto>> = transaction {
+        try {
+            val items = Item.find { ItemTable.user eq userId }.toList()
+            ResultWithError.Success(items.map { it.toDto() })
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Database error"))
         }
-        return@transaction item.toDto()
     }
 
-    fun update(id: Int, itemDto: ItemForm): Boolean = transaction {
-        val itemCategory = ItemCategory.findById(itemDto.categoryId)
-            ?: throw NotFoundException("Category not found")
-
-        val item = Item.findById(id) ?: return@transaction false
-
-        item.title = itemDto.title
-        item.description = itemDto.description
-        item.totalAmount = itemDto.totalAmount
-        item.category = itemCategory.id
-        item.imageUrl = itemDto.imageUrl
-        item.updatedAt = Instant.now()
-
-        return@transaction true
+    fun findAll(): ResultWithError<List<ItemDto>> = transaction {
+        try {
+            val items = Item.all().toList()
+            ResultWithError.Success(items.map { it.toDto() })
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Database error"))
+        }
     }
 
-    fun delete(id: Int): Boolean = transaction {
+    fun findById(id: Int): ResultWithError<ItemDto> = transaction {
         val item = Item.findById(id)
-        if (item == null) {
-            return@transaction false
+        if (item != null) {
+            ResultWithError.Success(item.toDto())
         } else {
+            ResultWithError.Failure(ServiceError.NotFound)
+        }
+    }
+
+    fun create(itemDto: ItemForm, principal: User): ResultWithError<ItemDto> = transaction {
+        try {
+            val itemCategory = ItemCategory.findById(itemDto.categoryId)
+                ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
+
+            val item = Item.new {
+                user = principal
+                title = itemDto.title
+                description = itemDto.description
+                totalAmount = itemDto.totalAmount
+                category = itemCategory.id
+                imageUrl = itemDto.imageUrl
+                createdAt = Instant.now()
+                updatedAt = Instant.now()
+            }
+            ResultWithError.Success(item.toDto())
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Creation failed"))
+        }
+    }
+
+    fun update(id: Int, itemDto: ItemForm, user: User): ResultWithError<Boolean> = transaction {
+        val itemCategory = ItemCategory.findById(itemDto.categoryId)
+            ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
+
+        val oldItem = Item.findById(id) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
+        if (oldItem.user.id.value != user.id.value) {
+            return@transaction ResultWithError.Failure(ServiceError.NotOwn)
+        }
+
+        try {
+            oldItem.title = itemDto.title
+            oldItem.description = itemDto.description
+            oldItem.totalAmount = itemDto.totalAmount
+            oldItem.category = itemCategory.id
+            oldItem.imageUrl = itemDto.imageUrl
+            oldItem.updatedAt = Instant.now()
+            ResultWithError.Success(true)
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Update failed"))
+        }
+    }
+
+    fun delete(id: Int, user: User): ResultWithError<Unit> = transaction {
+        val item = Item.findById(id) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
+
+        if (item.user.id.value != user.id.value) {
+            return@transaction ResultWithError.Failure(ServiceError.NotOwn)
+        }
+        try {
             item.delete()
-            return@transaction true
+            ResultWithError.Success(Unit)
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Delete failed"))
         }
     }
 }
