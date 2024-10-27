@@ -8,3 +8,6 @@ ALTER TABLE messages
 
 ALTER TABLE actions
     add column bid_price DOUBLE PRECISION;
+
+ALTER TABLE bids
+    add column last_user_bet INT REFERENCES users (id) ON DELETE SET NULL;

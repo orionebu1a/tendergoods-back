@@ -1,7 +1,5 @@
 package com.orion.api
 
-import com.orion.errors.ResultWithError
-import com.orion.errors.ServiceError
 import com.orion.model.UserForm
 import com.orion.service.UserService
 import io.ktor.http.*
@@ -9,15 +7,14 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import respondWithError
 
 fun Route.userRouting(userService: UserService) {
     route("/users") {
 
         get {
-            when (val result = userService.findAll()) {
-                is ResultWithError.Success -> call.respond(result.data)
-                is ResultWithError.Failure -> call.respond(HttpStatusCode.InternalServerError, result.error.message)
-            }
+            val result = userService.findAll()
+            call.respondWithError(result)
         }
 
         get("{id}") {
@@ -27,24 +24,14 @@ fun Route.userRouting(userService: UserService) {
                 return@get
             }
 
-            when (val result = userService.findById(id)) {
-                is ResultWithError.Success -> call.respond(result.data)
-                is ResultWithError.Failure -> {
-                    when (val error = result.error) {
-                        ServiceError.NotFound -> call.respond(HttpStatusCode.NotFound, error.message)
-                        is ServiceError.DatabaseError -> call.respond(HttpStatusCode.InternalServerError, error.message)
-                        else -> call.respond(HttpStatusCode.BadRequest, error.message)
-                    }
-                }
-            }
+            val result = userService.findById(id)
+            call.respondWithError(result)
         }
 
         post {
             val userForm = call.receive<UserForm>()
-            when (val result = userService.create(userForm)) {
-                is ResultWithError.Success -> call.respond(HttpStatusCode.Created, result.data)
-                is ResultWithError.Failure -> call.respond(HttpStatusCode.InternalServerError, result.error.message)
-            }
+            val result = userService.create(userForm)
+            call.respondWithError(result)
         }
 
         put("{id}") {
@@ -55,17 +42,8 @@ fun Route.userRouting(userService: UserService) {
             }
 
             val userForm = call.receive<UserForm>()
-            when (val result = userService.update(id, userForm)) {
-                is ResultWithError.Success -> call.respond(result.data)
-                is ResultWithError.Failure -> {
-                    val error = result.error
-                    when (error) {
-                        ServiceError.NotFound -> call.respond(HttpStatusCode.NotFound, error.message)
-                        is ServiceError.DatabaseError -> call.respond(HttpStatusCode.InternalServerError, error.message)
-                        else -> call.respond(HttpStatusCode.BadRequest, error.message)
-                    }
-                }
-            }
+            val result = userService.update(id, userForm)
+            call.respondWithError(result)
         }
 
         delete("{id}") {
@@ -75,17 +53,8 @@ fun Route.userRouting(userService: UserService) {
                 return@delete
             }
 
-            when (val result = userService.delete(id)) {
-                is ResultWithError.Success -> call.respond(HttpStatusCode.NoContent)
-                is ResultWithError.Failure -> {
-                    val error = result.error
-                    when (error) {
-                        ServiceError.NotFound -> call.respond(HttpStatusCode.NotFound, error.message)
-                        is ServiceError.DatabaseError -> call.respond(HttpStatusCode.InternalServerError, error.message)
-                        else -> call.respond(HttpStatusCode.BadRequest, error.message)
-                    }
-                }
-            }
+            val result = userService.delete(id)
+            call.respondWithError(result)
         }
     }
 }

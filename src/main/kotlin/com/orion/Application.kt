@@ -1,19 +1,16 @@
 package com.orion
 
 import User
-import bidRouting
-import com.orion.api.itemRouting
-import com.orion.api.userRouting
+import com.orion.api.*
+import com.orion.model.LoginForm
 import com.orion.model.UserForm
 import com.orion.security.JwtConfig
 import com.orion.security.JwtConfig.verifier
 import com.orion.security.PasswordService
 import com.orion.serializer.InstantSerializer
-import com.orion.service.BidService
-import com.orion.service.ItemService
-import com.orion.service.UserService
+import com.orion.service.*
 import io.ktor.http.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -23,6 +20,8 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.serializersModuleOf
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import java.time.Instant
@@ -55,12 +54,19 @@ fun Application.module() {
     val userService = UserService()
     val itemService = ItemService()
     val bidService = BidService()
+    val chatService = ChatService()
+    val betService = BetService()
 
     install(CallLogging)
     install(ContentNegotiation) {
-        gson {
-            registerTypeAdapter(Instant::class.java, InstantSerializer())
-        }
+        json(
+            Json {
+                serializersModule = serializersModuleOf(Instant::class, InstantSerializer)
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+            }
+        )
     }
     install(Authentication) {
         /**
@@ -83,9 +89,9 @@ fun Application.module() {
          * A public login [Route] used to obtain JWTs
          */
         post("login") {
-            val credentials = call.receive<UserPasswordCredential>()
-            val user = userService.findPrincipalByLogin(credentials.name)
-            if (user != null && PasswordService.checkPassword(credentials.password, user.passwordHash)) {
+            val loginForm = call.receive<LoginForm>()
+            val user = userService.findPrincipalByLogin(loginForm.email)
+            if (user != null && PasswordService.checkPassword(loginForm.password, user.passwordHash)) {
                 call.respondText(JwtConfig.makeToken(user))
             } else {
                 call.respond(HttpStatusCode.BadRequest, "Invalid username or password")
@@ -93,13 +99,9 @@ fun Application.module() {
         }
 
         post("register") {
-            val credentials = call.receive<UserPasswordCredential>()
+            val userForm = call.receive<UserForm>()
             userService.create(
-                UserForm(
-                    email = credentials.name,
-                    passwordHash = PasswordService.hashPassword(credentials.password),
-                    walletBalance = 0.0,
-                )
+                userForm
             )
             call.respond(HttpStatusCode.OK)
         }
@@ -111,6 +113,8 @@ fun Application.module() {
             userRouting(userService)
             bidRouting(bidService)
             itemRouting(itemService)
+            betRouting(betService)
+            chatRouting(chatService)
         }
     }
 }

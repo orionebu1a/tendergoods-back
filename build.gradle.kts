@@ -1,10 +1,10 @@
 val kotlin_version: String by project
 val logback_version: String by project
 val ktor_version: String by project
-
 plugins {
     kotlin("jvm") version "2.0.20"
     id("io.ktor.plugin") version "2.3.12"
+    kotlin("plugin.serialization") version "1.8.0"
 }
 
 group = "com.orion"
@@ -63,6 +63,6 @@ dependencies {
     implementation("io.ktor:ktor-server-auth:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
     implementation("io.ktor:ktor-server-call-logging:$ktor_version")
-    implementation("io.ktor:ktor-serialization-gson:$ktor_version")
     implementation("org.mindrot:jbcrypt:0.4")
+
 }

@@ -5,6 +5,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.CurrentTimestamp
 import org.jetbrains.exposed.sql.javatime.timestamp
 object BidTable : IntIdTable("bids") {
+    val lastUserBet = reference("last_user_bet", UserTable)
     val user = reference("user_id", UserTable)
     val latitude = double("latitude")
     val longitude = double("longitude")

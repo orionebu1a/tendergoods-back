@@ -23,4 +23,5 @@ class Bid(id: EntityID<Int>) : IntEntity(id) {
     var createdAt by BidTable.createdAt
     var updatedAt by BidTable.updatedAt
     val items by Item optionalReferrersOn ItemTable.bid
+    var lastUserBet by BidTable.lastUserBet
 }
