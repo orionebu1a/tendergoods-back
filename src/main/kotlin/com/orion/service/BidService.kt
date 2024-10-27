@@ -76,8 +76,10 @@ class BidService {
         val newBid = Bid.new {
             user = principal
             startingPrice = bid.startingPrice
-            currentPrice = bid.currentPrice
+            currentPrice = bid.startingPrice
             priceIncrement = bid.priceIncrement
+            latitude = bid.latitude
+            longitude = bid.longitude
             location = bid.location
             startTime = bid.startTime
             endTime = bid.endTime
@@ -100,8 +102,9 @@ class BidService {
         val oldBid = Bid.findById(id) ?: return@transaction false
 
         oldBid.startingPrice = bid.startingPrice
-        oldBid.currentPrice = bid.currentPrice
         oldBid.priceIncrement = bid.priceIncrement
+        oldBid.latitude = bid.latitude
+        oldBid.longitude = bid.longitude
         oldBid.location = bid.location
         oldBid.startTime = bid.startTime
         oldBid.endTime = bid.endTime

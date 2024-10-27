@@ -8,6 +8,8 @@ data class BidDto (
     val startingPrice: Double,
     val currentPrice: Double,
     val priceIncrement: Double,
+    val latitude: Double,
+    val longitude: Double,
     val location: String,
     val startTime: Instant,
     val endTime: Instant,
@@ -19,9 +21,10 @@ data class BidDto (
 
 data class BidForm (
     val startingPrice: Double,
-    val currentPrice: Double,
     val priceIncrement: Double,
     val location: String,
+    val latitude: Double,
+    val longitude: Double,
     val startTime: Instant,
     val endTime: Instant,
     val promotionRating: Int? = null,

@@ -4,7 +4,6 @@ import User
 import com.orion.api.bidRouting
 import com.orion.api.itemRouting
 import com.orion.api.userRouting
-import com.orion.model.UserDto
 import com.orion.model.UserForm
 import com.orion.service.BidService
 import com.orion.service.ItemService
@@ -88,7 +87,7 @@ fun Application.module() {
             if (user != null && PasswordService.checkPassword(credentials.password, user.passwordHash)) {
                 call.respondText(JwtConfig.makeToken(user))
             } else {
-                call.respond(HttpStatusCode.BadRequest)
+                call.respond(HttpStatusCode.BadRequest, "Invalid username or password")
             }
         }
 

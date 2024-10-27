@@ -8,7 +8,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 class Item(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Item>(ItemTable)
 
-    var user by User referencedOn  UserTable.id
+    var user by User referencedOn ItemTable.user
     var bidId by ItemTable.bid
     var userId by ItemTable.user
     var title by ItemTable.title
