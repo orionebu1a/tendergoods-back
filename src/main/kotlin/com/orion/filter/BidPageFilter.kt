@@ -1,7 +1,6 @@
 package com.orion.filter
 
 import com.orion.enums.BidState
-import java.time.Instant
 
 data class BidPageFilter (
     val from: Int,
@@ -14,7 +13,9 @@ data class BidPageFilter (
     val currentPriceTo: Double?,
     val priceIncrementFrom: Double?,
     val priceIncrementTo: Double?,
-    val location: String?,
+    var latitude: Double?,
+    var longitude: Double?,
+    val locations: List<String>,
     val locationRadius: Double?,
     val state: BidState
 )

@@ -10,6 +10,8 @@ import org.jetbrains.exposed.dao.id.EntityID
 class Bid(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Bid>(BidTable)
 
+    var latitude by BidTable.latitude
+    var longitude by BidTable.longitude
     var user by User referencedOn BidTable.user
     var startingPrice by BidTable.startingPrice
     var currentPrice by BidTable.currentPrice
