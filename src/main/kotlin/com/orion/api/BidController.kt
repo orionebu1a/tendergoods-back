@@ -15,7 +15,7 @@ import respondWithErrorProcessing
 fun Route.bidRouting(bidService: BidService) {
     route("/bids") {
 
-        get("paged") {
+        post("paged") {
             val bidPageFilter = call.receive<BidPageFilter>()
             val bids = bidService.findPagedByFilter(bidPageFilter)
             call.respond(bids)
