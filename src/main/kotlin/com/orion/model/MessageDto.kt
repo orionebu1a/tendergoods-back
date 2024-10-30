@@ -8,7 +8,8 @@ import java.time.Instant
 data class MessageDto (
     val text: String,
     @Serializable(with = InstantSerializer::class)
-    val createdAt: Instant
+    val createdAt: Instant,
+    val sender: Int
 )
 
 @Serializable

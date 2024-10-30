@@ -10,7 +10,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import respondWithError
+import respondWithErrorProcessing
 
 fun Route.bidRouting(bidService: BidService) {
     route("/bids") {
@@ -29,14 +29,14 @@ fun Route.bidRouting(bidService: BidService) {
             }
 
             val result = bidService.findById(id)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         post {
             val bid = call.receive<BidForm>()
 
             val result = bidService.create(bid, call.principal<User>()!!)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         put("{id}") {
@@ -49,7 +49,7 @@ fun Route.bidRouting(bidService: BidService) {
             val bidForm = call.receive<BidForm>()
 
             val result = bidService.update(id, bidForm, call.principal<User>()!!)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         delete("{id}") {
@@ -65,7 +65,7 @@ fun Route.bidRouting(bidService: BidService) {
                 return@delete
             }
             val result = bidService.delete(id, principal)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
     }

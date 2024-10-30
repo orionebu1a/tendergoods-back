@@ -9,7 +9,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import respondWithError
+import respondWithErrorProcessing
 
 fun Route.betRouting(betService: BetService) {
     route("/bet") {
@@ -20,7 +20,7 @@ fun Route.betRouting(betService: BetService) {
                 call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
             }
             val result = betService.doBet(betForm.bidId, betForm.newPrice, principal!!)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
     }
 }

@@ -7,14 +7,14 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import respondWithError
+import respondWithErrorProcessing
 
 fun Route.userRouting(userService: UserService) {
     route("/users") {
 
         get {
             val result = userService.findAll()
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         get("{id}") {
@@ -25,13 +25,13 @@ fun Route.userRouting(userService: UserService) {
             }
 
             val result = userService.findById(id)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         post {
             val userForm = call.receive<UserForm>()
             val result = userService.create(userForm)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         put("{id}") {
@@ -43,7 +43,7 @@ fun Route.userRouting(userService: UserService) {
 
             val userForm = call.receive<UserForm>()
             val result = userService.update(id, userForm)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         delete("{id}") {
@@ -54,7 +54,7 @@ fun Route.userRouting(userService: UserService) {
             }
 
             val result = userService.delete(id)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
     }
 }

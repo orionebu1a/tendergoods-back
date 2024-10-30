@@ -9,7 +9,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import respondWithError
+import respondWithErrorProcessing
 
 fun Route.itemRouting(itemService: ItemService) {
     route("/items") {
@@ -22,7 +22,7 @@ fun Route.itemRouting(itemService: ItemService) {
             }
 
             val result = itemService.findById(id)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         get("/ownedByUser/{id}") {
@@ -33,7 +33,7 @@ fun Route.itemRouting(itemService: ItemService) {
             }
 
             val result = itemService.findAllUserItems(userId)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         post {
@@ -44,7 +44,7 @@ fun Route.itemRouting(itemService: ItemService) {
             }
 
             val result = itemService.create(itemForm, principal)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         put("{id}") {
@@ -57,7 +57,7 @@ fun Route.itemRouting(itemService: ItemService) {
             val itemForm = call.receive<ItemForm>()
             val principal = call.principal<User>()
             val result = itemService.update(id, itemForm, principal!!)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
 
         delete("{id}") {
@@ -69,7 +69,7 @@ fun Route.itemRouting(itemService: ItemService) {
             }
 
             val result = itemService.delete(id, principal!!)
-            call.respondWithError(result)
+            call.respondWithErrorProcessing(result)
         }
     }
 }

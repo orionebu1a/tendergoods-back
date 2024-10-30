@@ -4,7 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 
-suspend fun ApplicationCall.respondWithError(result: ResultWithError<*>) {
+suspend fun ApplicationCall.respondWithErrorProcessing(result: ResultWithError<*>) {
     when (result) {
         is ResultWithError.Success<*> -> {
             if (result.data == null) {
