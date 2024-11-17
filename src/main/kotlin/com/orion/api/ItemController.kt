@@ -20,8 +20,12 @@ fun Route.itemRouting(itemService: ItemService) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid item ID")
                 return@get
             }
+            val principal = call.principal<User>() ?: run {
+                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+                return@get
+            }
 
-            val result = itemService.findById(id)
+            val result = itemService.findById(id, principal)
             call.respondWithErrorProcessing(result)
         }
 

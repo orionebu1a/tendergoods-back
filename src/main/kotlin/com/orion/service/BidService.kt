@@ -4,6 +4,7 @@ import User
 import com.orion.converter.toDto
 import com.orion.entity.Bid
 import com.orion.entity.Item
+import com.orion.enums.ActionType
 import com.orion.enums.BidState
 import com.orion.errors.ResultWithError
 import com.orion.errors.ServiceError
@@ -22,7 +23,9 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
-class BidService {
+class BidService(
+    private val actionService: InternalActionService,
+) {
 
     fun findPagedByFilter(filter: BidPageFilter): List<BidDto> = transaction {
         val matchingItems = Item.find { filter.itemCategories.let {
@@ -80,16 +83,17 @@ class BidService {
             .map { it.toDto() }
     }
 
-    fun findById(id: Int): ResultWithError<BidDto> = transaction {
+    fun findById(id: Int, user: User): ResultWithError<BidDto> = transaction {
         val bid = Bid.findById(id) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
+        actionService.doBidActionBySelf(user, ActionType.VISIT, bid)
         ResultWithError.Success(bid.toDto())
     }
 
-    fun create(bid: BidForm, principal: User): ResultWithError<BidDto> = transaction {
+    fun create(bid: BidForm, user: User): ResultWithError<BidDto> = transaction {
         try {
             val itemsFound = Item.find { ItemTable.id inList bid.items }.toList()
             val newBid = Bid.new {
-                user = principal
+                this.user = user
                 startingPrice = bid.startingPrice
                 currentPrice = bid.startingPrice
                 priceIncrement = bid.priceIncrement
@@ -103,7 +107,7 @@ class BidService {
                 updatedAt = Instant.now()
             }
             itemsFound.forEach { it.bidId = newBid.id }
-
+            actionService.doBidActionBySelf(user, ActionType.CREATE, newBid)
             ResultWithError.Success(newBid.toDto())
         } catch (e: Exception) {
             ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Unknown error"))
@@ -129,6 +133,7 @@ class BidService {
                 promotionRating = bid.promotionRating ?: 0
                 updatedAt = Instant.now()
             }
+            actionService.doBidActionBySelf(user, ActionType.EDIT, oldBid)
             ResultWithError.Success(oldBid.toDto())
         } catch (e: Exception) {
             ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Update failed"))
@@ -143,6 +148,7 @@ class BidService {
         }
         try {
             bid.delete()
+            actionService.doBidActionBySelf(user, ActionType.EDIT, bid)
             ResultWithError.Success(Unit)
         } catch (e: Exception) {
             ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Delete failed"))

@@ -51,11 +51,12 @@ fun Application.module() {
         password = dbPassword
     )
 
+    val actionService = InternalActionService()
     val userService = UserService()
-    val itemService = ItemService()
-    val bidService = BidService()
+    val itemService = ItemService(actionService)
+    val bidService = BidService(actionService)
     val chatService = ChatService()
-    val betService = BetService()
+    val betService = BetService(actionService)
 
     install(CallLogging)
     install(ContentNegotiation) {

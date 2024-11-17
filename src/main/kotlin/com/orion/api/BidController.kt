@@ -27,8 +27,13 @@ fun Route.bidRouting(bidService: BidService) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid bid ID")
                 return@get
             }
+            val principal = call.principal<User>()
+            if (principal == null) {
+                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+                return@get
+            }
 
-            val result = bidService.findById(id)
+            val result = bidService.findById(id, principal)
             call.respondWithErrorProcessing(result)
         }
 

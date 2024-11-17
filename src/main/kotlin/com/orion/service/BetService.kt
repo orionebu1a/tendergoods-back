@@ -2,12 +2,15 @@ package com.orion.service
 
 import User
 import com.orion.entity.Bid
+import com.orion.enums.ActionType
 import com.orion.errors.ResultWithError
 import com.orion.errors.ServiceError
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
-class BetService {
+class BetService(
+    private val actionService: InternalActionService,
+) {
     fun doBet(bidId: Int, newBet: Double, user: User): ResultWithError<String> = transaction {
         val bid = Bid.findById(bidId) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
         if (bid.endTime < Instant.now()) {
@@ -27,6 +30,7 @@ class BetService {
         } else {
             Instant.now().plusSeconds(10 * 60)
         }
+        actionService.doBidActionBySelf(user, ActionType.BET, bid)
         ResultWithError.Success("Bet placed successfully")
     }
 }

@@ -8,10 +8,10 @@ import org.jetbrains.exposed.dao.id.EntityID
 
 class Action(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Action>(ActionTable)
-    val user by User referencedOn ActionTable.user
-    val item by Item referencedOn ActionTable.item
-    val actionType by ActionTable.actionType
-    val bidPrice by ActionTable.bidPrice
-    val itemCategory by ActionTable.itemCategory
-    val actionTime by ActionTable.actionTime
+    var user by User referencedOn ActionTable.user
+    var item by Item optionalReferencedOn ActionTable.item
+    var actionType by ActionTable.actionType
+    var bidPrice by ActionTable.bidPrice
+    var itemCategory by ActionTable.itemCategory
+    var actionTime by ActionTable.actionTime
 }
