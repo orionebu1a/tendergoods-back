@@ -52,9 +52,10 @@ fun Application.module() {
     )
 
     val actionService = InternalActionService()
+    val adviceService = InternalAdviceService()
     val userService = UserService()
     val itemService = ItemService(actionService)
-    val bidService = BidService(actionService)
+    val bidService = BidService(actionService, adviceService)
     val chatService = ChatService()
     val betService = BetService(actionService)
 

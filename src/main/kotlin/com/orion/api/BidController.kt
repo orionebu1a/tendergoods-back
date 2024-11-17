@@ -17,7 +17,12 @@ fun Route.bidRouting(bidService: BidService) {
 
         post("paged") {
             val bidPageFilter = call.receive<BidPageFilter>()
-            val bids = bidService.findPagedByFilter(bidPageFilter)
+            val principal = call.principal<User>()
+            if (principal == null) {
+                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+                return@post
+            }
+            val bids = bidService.findPagedByFilter(bidPageFilter, principal)
             call.respond(bids)
         }
 
