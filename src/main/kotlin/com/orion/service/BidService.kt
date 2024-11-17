@@ -25,9 +25,10 @@ import java.time.Instant
 
 class BidService(
     private val actionService: InternalActionService,
+    private val adviceService: InternalAdviceService,
 ) {
 
-    fun findPagedByFilter(filter: BidPageFilter): List<BidDto> = transaction {
+    fun findPagedByFilter(filter: BidPageFilter, user: User): List<BidDto> = transaction {
         val matchingItems = Item.find { filter.itemCategories.let {
             if (it == null) {
                 return@let Op.TRUE
@@ -71,6 +72,27 @@ class BidService(
                         stateCondition
             }.toList()
 
+        val itemsRanking = bids.associateWith{ _ -> 0.0 }
+        val advice = adviceService.getAdvice(user)
+
+        if (filter.itemCategories == null) {
+            itemsRanking.forEach { (bid, rank) ->
+                if (bid.items.any { it.category.value == advice.itemCategory }) {
+                    bid to rank + 10
+                }
+            }
+        }
+
+        if (filter.currentPriceTo == null && filter.currentPriceFrom == null) {
+            itemsRanking.forEach { (bid, rank) ->
+                bid to rank + ((advice.avgBidPrice ?: 1000.0) / bid.currentPrice) * 10
+            }
+        }
+
+        itemsRanking.forEach { (bid, rank) ->
+            bid to (rank + (bid.user.rating ?: 0.0))
+        }
+
         return@transaction bids
             .filter {
                 if (filter.latitude != null && filter.longitude != null) {
@@ -80,6 +102,7 @@ class BidService(
                     return@filter true
                 }
             }
+            .subList(filter.from, filter.to)
             .map { it.toDto() }
     }
 
