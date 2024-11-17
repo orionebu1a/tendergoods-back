@@ -6,8 +6,8 @@ import com.orion.model.Advice
 import com.orion.table.ActionTable
 
 class InternalAdviceService {
-    fun getAdvice(principal: User): Advice {
-        val actions = Action.find { ActionTable.user eq principal.id }
+    fun getAdvice(user: User): Advice {
+        val actions = Action.find { ActionTable.user eq user.id }
         val mostPopularCategory = actions
             .groupingBy { it.itemCategory }
             .eachCount()

@@ -1,2 +1,0 @@
-ALTER TABLE actions
-ALTER COLUMN user_id SET NOT NULL;

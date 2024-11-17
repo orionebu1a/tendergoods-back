@@ -10,6 +10,7 @@ import java.time.Instant
 
 class BetService(
     private val actionService: InternalActionService,
+    private val moneyTransactionService: InternalMoneyTransactionService,
 ) {
     fun doBet(bidId: Int, newBet: Double, user: User): ResultWithError<String> = transaction {
         val bid = Bid.findById(bidId) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
@@ -31,6 +32,7 @@ class BetService(
             Instant.now().plusSeconds(10 * 60)
         }
         actionService.doBidActionBySelf(user, ActionType.BET, bid)
+        moneyTransactionService.payForBet(user, bid)
         ResultWithError.Success("Bet placed successfully")
     }
 }

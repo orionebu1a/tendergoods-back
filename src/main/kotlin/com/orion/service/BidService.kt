@@ -26,6 +26,7 @@ import java.time.Instant
 class BidService(
     private val actionService: InternalActionService,
     private val adviceService: InternalAdviceService,
+    private val promotionService: PromotionService,
 ) {
 
     fun findPagedByFilter(filter: BidPageFilter, user: User): List<BidDto> = transaction {
@@ -91,6 +92,10 @@ class BidService(
 
         itemsRanking.forEach { (bid, rank) ->
             bid to (rank + (bid.user.rating ?: 0.0))
+        }
+
+        itemsRanking.forEach { (bid, rank) ->
+            bid to rank + promotionService.maxPromotionsForBid(bid)
         }
 
         return@transaction bids
