@@ -25,8 +25,8 @@ class ChatService {
         }
         val reciever = User.findById(userId) ?: return@transaction ResultWithError.Failure(ServiceError.Custom("Reciever not found not found"))
         Message.new {
-            sender = user.id
-            receiver = reciever.id
+            sender = user
+            receiver = reciever
             bid = bidToBind.id
             text = textToSend
             createdAt = Instant.now()

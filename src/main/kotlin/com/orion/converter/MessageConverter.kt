@@ -7,6 +7,6 @@ fun Message.toDto(): MessageDto {
     return MessageDto(
         text = text,
         createdAt = createdAt,
-        sender = sender.value,
+        sender = sender.id.value,
     )
 }

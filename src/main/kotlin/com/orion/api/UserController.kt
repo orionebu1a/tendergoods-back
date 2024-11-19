@@ -11,7 +11,6 @@ import com.orion.errors.respondWithErrorProcessing
 
 fun Route.userRouting(userService: UserService) {
     route("/users") {
-
         get {
             val result = userService.findAll()
             call.respondWithErrorProcessing(result)

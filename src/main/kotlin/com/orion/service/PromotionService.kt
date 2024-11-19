@@ -1,6 +1,6 @@
 package com.orion.service
 
-import PromotionType
+import com.orion.entity.PromotionType
 import User
 import com.orion.entity.Bid
 import com.orion.entity.Promotion
@@ -8,7 +8,7 @@ import com.orion.enums.PromotionClass
 import com.orion.errors.ResultWithError
 import com.orion.errors.ServiceError
 import com.orion.table.PromotionTable
-import com.orion.table.PromotionTypesTable
+import com.orion.table.PromotionTypeTable
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.or
@@ -18,20 +18,20 @@ import java.time.Instant
 class PromotionService(
     private val moneyTransactionService: InternalMoneyTransactionService,
 ) {
-    fun findAllPromotionTypes(): List<PromotionType> {
-        return PromotionType.all()
-            .orderBy(PromotionTypesTable.price to SortOrder.ASC)
-            .toList()
+    fun findAllPromotionTypes(): ResultWithError<List<PromotionType>> {
+        return ResultWithError.Success(PromotionType.all()
+            .orderBy(PromotionTypeTable.price to SortOrder.ASC)
+            .toList())
     }
 
     fun maxPromotionsForBid(bid: Bid): Double {
         return PromotionTable
-            .join(PromotionTypesTable, JoinType.INNER, onColumn = PromotionTable.promotionType, otherColumn = PromotionTypesTable.id)
+            .join(PromotionTypeTable, JoinType.INNER, onColumn = PromotionTable.promotionType, otherColumn = PromotionTypeTable.id)
             .select {
                 (PromotionTable.bid eq bid.id) or (PromotionTable.user eq bid.user.id)
             }
-            .orderBy(PromotionTypesTable.promotionPlus to SortOrder.DESC)
-            .map { it[PromotionTypesTable.promotionPlus] }
+            .orderBy(PromotionTypeTable.promotionPlus to SortOrder.DESC)
+            .map { it[PromotionTypeTable.promotionPlus] }
             .first()
     }
 

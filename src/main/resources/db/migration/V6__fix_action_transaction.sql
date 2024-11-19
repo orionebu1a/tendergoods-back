@@ -29,8 +29,12 @@ INSERT INTO promotion_types(name, promotion_class, promotion_plus, price, durati
 ('30 days all','ALL', 5, 2000, 30);
 
 ALTER TABLE promotions
-drop column promotion_type;
+DROP COLUMN promotion_type;
 
 ALTER TABLE promotions
-add column promotion_type_id
+ADD COLUMN promotion_type_id
 INT REFERENCES promotion_types (id) ON DELETE SET NULL;
+
+ALTER TABLE reviews
+RENAME COLUMN reviewee_id
+TO reviewed_id;
