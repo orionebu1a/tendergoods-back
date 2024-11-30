@@ -1,9 +1,7 @@
 package com.orion.api
 
 import User
-import com.orion.entity.Review
 import com.orion.errors.respondWithErrorProcessing
-import com.orion.model.BetForm
 import com.orion.model.ReviewForm
 import com.orion.service.ReviewService
 import io.ktor.http.*

@@ -65,4 +65,9 @@ dependencies {
     implementation("io.ktor:ktor-server-call-logging:$ktor_version")
     implementation("org.mindrot:jbcrypt:0.4")
 
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
+    testImplementation("io.ktor:ktor-server-test-host")
+    testImplementation("com.h2database:h2:2.2.224")
 }

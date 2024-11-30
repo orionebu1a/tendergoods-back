@@ -9,8 +9,8 @@ CREATE TABLE users
     gender         VARCHAR(10),
     rating         DOUBLE PRECISION DEFAULT 0.0,
     wallet_balance DOUBLE PRECISION DEFAULT 0.0,
-    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at     TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMP        DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE bids
@@ -22,9 +22,9 @@ CREATE TABLE bids
     starting_price   DOUBLE PRECISION NOT NULL,
     current_price    DOUBLE PRECISION NOT NULL,
     price_increment  DOUBLE PRECISION NOT NULL,
-    location         VARCHAR(255) NOT NULL,
-    start_time       TIMESTAMP NOT NULL,
-    end_time         TIMESTAMP NOT NULL,
+    location         VARCHAR(255)     NOT NULL,
+    start_time       TIMESTAMP        NOT NULL,
+    end_time         TIMESTAMP        NOT NULL,
     promotion_rating INT
 );
 
@@ -67,7 +67,7 @@ CREATE TABLE reviews
     id          SERIAL PRIMARY KEY,
     reviewer_id INT REFERENCES users (id) ON DELETE CASCADE,
     reviewee_id INT REFERENCES users (id) ON DELETE CASCADE,
-    rating      DOUBLE PRECISION NOT NULL CHECK (rating BETWEEN 0 AND 5),
+    rating      DOUBLE PRECISION                    NOT NULL CHECK (rating BETWEEN 0 AND 5),
     review_text TEXT,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -76,8 +76,8 @@ CREATE TABLE actions
 (
     id               SERIAL PRIMARY KEY,
     action_type      VARCHAR(20),
-    user_id          INT REFERENCES users (id) ON DELETE SET NULL,
-    item_id          INT REFERENCES items (id) ON DELETE SET NULL,
+    user_id          INT                                 REFERENCES users (id) ON DELETE SET NULL,
+    item_id          INT                                 REFERENCES items (id) ON DELETE SET NULL,
     item_category_id VARCHAR(20),
     action_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -86,8 +86,8 @@ CREATE TABLE promotions
 (
     id             SERIAL PRIMARY KEY,
     promotion_type VARCHAR(20),
-    user_id        INT REFERENCES users (id) ON DELETE SET NULL,
-    bid_id         INT REFERENCES items (id) ON DELETE SET NULL,
+    user_id        INT       REFERENCES users (id) ON DELETE SET NULL,
+    bid_id         INT       REFERENCES items (id) ON DELETE SET NULL,
     start_time     TIMESTAMP NOT NULL,
     end_time       TIMESTAMP NOT NULL
 );
