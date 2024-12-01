@@ -1,11 +1,14 @@
 package promotion.user;
 
-import User
+import com.orion.model.LoginForm
 import com.orion.model.UserDto
+import com.orion.module
 import com.orion.security.PasswordService
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
@@ -14,10 +17,16 @@ import java.time.Instant
 import kotlin.test.assertEquals
 
 class UserTest : IntegrationTest() {
-
-
     @Test
     fun simpleUserTest() = testApplication {
+        application {
+            module()
+        }
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
         val passwordService = PasswordService
         val password = "password"
         val user = UserDto(
@@ -37,7 +46,12 @@ class UserTest : IntegrationTest() {
         // Отправляем запрос на логин
         val loginResponse = client.post("/login") {
             contentType(ContentType.Application.Json)
-            setBody("""{"email": "mcs@gmail.com", "password": "$password"}""")
+            setBody(
+                LoginForm(
+                    "mcs@gmail.com",
+                    password,
+                )
+            )
         }
 
         // Проверяем, что логин прошел успешно и получили JWT токен

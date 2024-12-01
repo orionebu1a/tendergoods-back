@@ -1,10 +1,10 @@
 ALTER TABLE users
-    add column role varchar(20);
+    add column role VARCHAR(40);
 
 CREATE TABLE item_category
 (
     id   SERIAL PRIMARY KEY,
-    name VARCHAR(20)
+    name VARCHAR(40)
 );
 
 ALTER TABLE items

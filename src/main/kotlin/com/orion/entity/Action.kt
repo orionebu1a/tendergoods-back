@@ -1,6 +1,5 @@
 package com.orion.entity
 
-import User
 import com.orion.table.ActionTable
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass

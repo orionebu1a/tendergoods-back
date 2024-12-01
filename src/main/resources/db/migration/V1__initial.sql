@@ -35,7 +35,7 @@ CREATE TABLE items
     title        VARCHAR(255)                        NOT NULL,
     description  TEXT,
     total_amount INT                                 NOT NULL,
-    category     VARCHAR(20)                         NOT NULL,
+    category     VARCHAR(40)                         NOT NULL,
     image_url    VARCHAR(255),
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE notifications
 (
     id         SERIAL PRIMARY KEY,
     user_id    INT REFERENCES users (id) ON DELETE CASCADE,
-    type       VARCHAR(20),
+    type       VARCHAR(40),
     message    TEXT                                NOT NULL,
     is_read    BOOLEAN   DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -75,17 +75,17 @@ CREATE TABLE reviews
 CREATE TABLE actions
 (
     id               SERIAL PRIMARY KEY,
-    action_type      VARCHAR(20),
+    action_type      VARCHAR(40),
     user_id          INT                                 REFERENCES users (id) ON DELETE SET NULL,
     item_id          INT                                 REFERENCES items (id) ON DELETE SET NULL,
-    item_category_id VARCHAR(20),
+    item_category_id VARCHAR(40),
     action_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE promotions
 (
     id             SERIAL PRIMARY KEY,
-    promotion_type VARCHAR(20),
+    promotion_type VARCHAR(40),
     user_id        INT       REFERENCES users (id) ON DELETE SET NULL,
     bid_id         INT       REFERENCES items (id) ON DELETE SET NULL,
     start_time     TIMESTAMP NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE promotions
 CREATE TABLE money_transactions
 (
     id               SERIAL PRIMARY KEY,
-    transaction_type VARCHAR(20),
+    transaction_type VARCHAR(40),
     user_id          INT REFERENCES users (id) ON DELETE SET NULL,
     money            DOUBLE PRECISION DEFAULT 0.0
 );

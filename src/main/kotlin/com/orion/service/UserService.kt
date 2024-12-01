@@ -1,6 +1,6 @@
 package com.orion.service
 
-import User
+import com.orion.entity.User
 import com.orion.converter.toDto
 import com.orion.errors.ResultWithError
 import com.orion.errors.ServiceError

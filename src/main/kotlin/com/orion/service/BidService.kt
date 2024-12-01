@@ -1,6 +1,6 @@
 package com.orion.service
 
-import User
+import com.orion.entity.User
 import com.orion.converter.toDto
 import com.orion.entity.Bid
 import com.orion.entity.Item
@@ -38,7 +38,7 @@ class BidService(
                 return@let ItemTable.category inList filter.itemCategories!!
             }
         } }.toList()
-        val bidsWithMatchingItems = matchingItems.mapNotNull { it.bidId?.value }.distinct()
+        val bidsWithMatchingItems = matchingItems.mapNotNull { it.bidId?.value }
 
         val stateCondition = when (filter.state) {
             BidState.ALL -> Op.TRUE
@@ -73,29 +73,29 @@ class BidService(
                         stateCondition
             }.toList()
 
-        val itemsRanking = bids.associateWith{ _ -> 0.0 }
+        val bidsRanking = bids.associateWith{ _ -> 0.0 }.toMutableMap()
         val advice = adviceService.getAdvice(user)
 
         if (filter.itemCategories == null) {
-            itemsRanking.forEach { (bid, rank) ->
+            bidsRanking.forEach { (bid, rank) ->
                 if (bid.items.any { it.category.value == advice.itemCategory }) {
-                    bid to rank + 10
+                    bidsRanking[bid] = rank + 10
                 }
             }
         }
 
         if (filter.currentPriceTo == null && filter.currentPriceFrom == null) {
-            itemsRanking.forEach { (bid, rank) ->
-                bid to rank + ((advice.avgBidPrice ?: 1000.0) / bid.currentPrice) * 10
+            bidsRanking.forEach { (bid, rank) ->
+                bidsRanking[bid] = rank + ((advice.avgBidPrice ?: 1000.0) / bid.currentPrice) * 10
             }
         }
 
-        itemsRanking.forEach { (bid, rank) ->
-            bid to (rank + (bid.user.rating ?: 0.0))
+        bidsRanking.forEach { (bid, rank) ->
+            bidsRanking[bid] = (rank + (bid.user.rating ?: 0.0))
         }
 
-        itemsRanking.forEach { (bid, rank) ->
-            bid to rank + promotionService.maxPromotionsForBid(bid)
+        bidsRanking.forEach { (bid, rank) ->
+            bidsRanking[bid] = rank + promotionService.maxPromotionsForBid(bid)
         }
 
         return@transaction bids
@@ -107,7 +107,15 @@ class BidService(
                     return@filter true
                 }
             }
-            .subList(filter.from, filter.to)
+            .sortedWith(
+                compareByDescending<Bid> { bidsRanking[it] }
+                .thenByDescending { it.createdAt }
+            )
+            .let {
+                val fromIndex = filter.from.coerceAtLeast(0)
+                val toIndex = filter.to.coerceAtMost(it.size)
+                it.subList(fromIndex, toIndex)
+            }
             .map { it.toDto() }
     }
 
@@ -130,7 +138,6 @@ class BidService(
                 location = bid.location
                 startTime = bid.startTime
                 endTime = bid.endTime
-                promotionRating = bid.promotionRating ?: 0
                 createdAt = Instant.now()
                 updatedAt = Instant.now()
             }
@@ -158,7 +165,6 @@ class BidService(
                 location = bid.location
                 startTime = bid.startTime
                 endTime = bid.endTime
-                promotionRating = bid.promotionRating ?: 0
                 updatedAt = Instant.now()
             }
             actionService.doBidActionBySelf(user, ActionType.EDIT, oldBid)

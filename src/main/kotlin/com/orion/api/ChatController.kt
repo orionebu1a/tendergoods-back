@@ -1,6 +1,6 @@
 package com.orion.api
 
-import User
+import com.orion.entity.User
 import com.orion.model.MessageForm
 import com.orion.service.ChatService
 import io.ktor.http.*
@@ -15,36 +15,36 @@ fun Route.chatRouting(chatService: ChatService) {
     route("/chat") {
         post("sendMessage") {
             val messageForm = call.receive<MessageForm>()
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
             }
-            val result = chatService.sendMessageTo(messageForm.bidId, messageForm.receiverId, principal!!, messageForm.text)
+            val result = chatService.sendMessageTo(messageForm.bidId, messageForm.receiverId, user!!, messageForm.text)
             call.respondWithErrorProcessing(result)
         }
         get("allUserChats") {
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
             }
-            val result = chatService.getAllChatsWithLastMessage(principal!!)
+            val result = chatService.getAllChatsWithLastMessage(user!!)
             call.respondWithErrorProcessing(result)
         }
         get("chatHistory") {
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
             }
-            val result = chatService.getAllChatsWithLastMessage(principal!!)
+            val result = chatService.getAllChatsWithLastMessage(user!!)
             call.respondWithErrorProcessing(result)
         }
         get("{id}") {
             val id = call.parameters["id"]!!.toInt()
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
             }
-            val result = chatService.getChatHistory(principal!!, id)
+            val result = chatService.getChatHistory(user!!, id)
             call.respondWithErrorProcessing(result)
         }
     }

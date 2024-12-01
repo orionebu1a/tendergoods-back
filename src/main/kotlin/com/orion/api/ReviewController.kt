@@ -1,6 +1,6 @@
 package com.orion.api
 
-import User
+import com.orion.entity.User
 import com.orion.errors.respondWithErrorProcessing
 import com.orion.model.ReviewForm
 import com.orion.service.ReviewService
@@ -15,11 +15,11 @@ fun Route.reviewRouting(reviewService: ReviewService) {
     route("/review") {
         post {
             val reviewForm = call.receive<ReviewForm>()
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
             }
-            val result = reviewService.createReview(principal!!, reviewForm.reviewed, reviewForm.rating, reviewForm.reviewText)
+            val result = reviewService.createReview(user!!, reviewForm.reviewed, reviewForm.rating, reviewForm.reviewText)
             call.respondWithErrorProcessing(result)
         }
     }

@@ -20,8 +20,8 @@ ALTER TABLE money_transactions
 CREATE TABLE promotion_types
 (
     id              SERIAL PRIMARY KEY,
-    name            VARCHAR(20),
-    promotion_class VARCHAR(20),
+    name            VARCHAR(40),
+    promotion_class VARCHAR(40),
     promotion_plus  DOUBLE PRECISION DEFAULT 0.0,
     duration_days   INTEGER          DEFAULT 0,
     price           DOUBLE PRECISION DEFAULT 0.0

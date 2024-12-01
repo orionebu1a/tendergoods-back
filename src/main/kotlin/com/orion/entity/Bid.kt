@@ -1,6 +1,5 @@
 package com.orion.entity
 
-import User
 import com.orion.table.BidTable
 import com.orion.table.ItemTable
 import org.jetbrains.exposed.dao.IntEntity
@@ -19,7 +18,6 @@ class Bid(id: EntityID<Int>) : IntEntity(id) {
     var location by BidTable.location
     var startTime by BidTable.startTime
     var endTime by BidTable.endTime
-    var promotionRating by BidTable.promotionRating
     var createdAt by BidTable.createdAt
     var updatedAt by BidTable.updatedAt
     val items by Item optionalReferrersOn ItemTable.bid

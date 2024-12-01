@@ -1,14 +1,20 @@
 package promotion
 
+import com.orion.entity.User
+import com.orion.model.LoginForm
 import com.orion.security.PasswordService
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
+import junit.framework.TestCase.assertEquals
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
 import java.time.Instant
-import kotlin.test.assertEquals
 
 open class IntegrationTest {
     companion object {
@@ -41,14 +47,6 @@ open class IntegrationTest {
                 Database.connect(dataSource)
 
                 transaction {
-                    val tables =
-                        exec("SELECT table_name FROM information_schema.tables WHERE table_schema = 'PUBLIC'") { rs ->
-                            generateSequence {
-                                if (rs.next()) rs.getString("table_name") else null
-                            }.toList()
-                        }
-                    println("Список таблиц в базе данных: $tables")
-
                     val password = "password"
                     User.new {
                         email = "mcs@gmail.com"
@@ -64,7 +62,7 @@ open class IntegrationTest {
                     }
 
                     User.new {
-                        email = "petr@gmail.com"
+                        email = "ivan@gmail.com"
                         passwordHash = passwordService.hashPassword(password)
                         firstName = "Ivan"
                         lastName = "Ivanov"
@@ -75,8 +73,73 @@ open class IntegrationTest {
                         createdAt = Instant.now()
                         updatedAt = Instant.now()
                     }
+
+                    User.new {
+                        email = "daria@gmail.com"
+                        passwordHash = passwordService.hashPassword(password)
+                        firstName = "Daria"
+                        lastName = "Petrova"
+                        age = 40
+                        gender = "female"
+                        rating = 3.0
+                        walletBalance = 21.0
+                        createdAt = Instant.now()
+                        updatedAt = Instant.now()
+                    }
                 }
             }
         }
     }
+
+    suspend fun ApplicationTestBuilder.tokenLoginHelper(): List<String> {
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+        val password1 = "password"
+        val email1 = "mcs@gmail.com"
+        val loginResponse1 = client.post("/login") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                LoginForm(
+                    email = email1,
+                    password = password1
+                )
+            )
+        }
+        assertEquals(HttpStatusCode.OK, loginResponse1.status)
+        val token1 = loginResponse1.bodyAsText()
+
+        val password2 = "password"
+        val email2 = "ivan@gmail.com"
+        val loginResponse2 = client.post("/login") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                LoginForm(
+                    email = email2,
+                    password = password2
+                )
+            )
+        }
+        assertEquals(HttpStatusCode.OK, loginResponse2.status)
+        val token2 = loginResponse2.bodyAsText()
+
+        val password3 = "password"
+        val email3 = "daria@gmail.com"
+        val loginResponse3 = client.post("/login") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                LoginForm(
+                    email = email3,
+                    password = password3
+                )
+            )
+        }
+        assertEquals(HttpStatusCode.OK, loginResponse3.status)
+        val token3 = loginResponse3.bodyAsText()
+
+        return listOf(token1, token2, token3)
+    }
+
 }

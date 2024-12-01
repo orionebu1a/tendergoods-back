@@ -1,3 +1,6 @@
+package com.orion.entity
+
+import UserTable
 import io.ktor.server.auth.*
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -16,4 +19,8 @@ class User(id: EntityID<Int>) : IntEntity(id), Principal {
     var walletBalance by UserTable.walletBalance
     var createdAt by UserTable.createdAt
     var updatedAt by UserTable.updatedAt
+}
+
+fun User.getFullName(): String {
+    return this.firstName + " " + this.lastName
 }

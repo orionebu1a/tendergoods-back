@@ -9,6 +9,6 @@ object MoneyTransactionTable : IntIdTable("money_transactions") {
     val sender = reference("sender_id", UserTable)
     val receiver = reference("receiver_id", UserTable)
     val money = double("money")
-    val transactionType = text("transactionType")
+    val transactionType = text("transaction_type")
     val time = timestamp("time").defaultExpression(CurrentTimestamp())
 }

@@ -1,12 +1,13 @@
 package com.orion.service
 
-import User
+import com.orion.entity.User
 import com.orion.entity.Action
 import com.orion.model.Advice
 import com.orion.table.ActionTable
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class InternalAdviceService {
-    fun getAdvice(user: User): Advice {
+    fun getAdvice(user: User): Advice = transaction {
         val actions = Action.find { ActionTable.user eq user.id }
         val mostPopularCategory = actions
             .groupingBy { it.itemCategory }
@@ -16,7 +17,8 @@ class InternalAdviceService {
         val avgBidPrice = actions
             .mapNotNull { it.bidPrice }
             .average()
+            .takeUnless { it.isNaN() } ?: 0.0
         val advice = Advice(mostPopularCategory?.value, avgBidPrice)
-        return advice
+        advice
     }
 }

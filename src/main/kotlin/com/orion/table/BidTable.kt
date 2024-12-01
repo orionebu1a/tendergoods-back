@@ -15,7 +15,6 @@ object BidTable : IntIdTable("bids") {
     val location = varchar("location", 255)
     val startTime = timestamp("start_time")
     val endTime = timestamp("end_time")
-    val promotionRating = integer("promotion_rating")
     val createdAt = timestamp("created_at").defaultExpression(CurrentTimestamp())
     val updatedAt = timestamp("updated_at").defaultExpression(CurrentTimestamp())
 }

@@ -1,6 +1,6 @@
 package com.orion.service
 
-import User
+import com.orion.entity.User
 import com.orion.entity.Bid
 import com.orion.enums.ActionType
 import com.orion.errors.ResultWithError

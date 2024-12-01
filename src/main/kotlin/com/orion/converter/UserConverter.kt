@@ -1,6 +1,6 @@
 package com.orion.converter
 
-import User
+import com.orion.entity.User
 import com.orion.model.UserDto
 
 fun UserDto.toModel(): User {

@@ -1,6 +1,6 @@
 package com.orion.api
 
-import User
+import com.orion.entity.User
 import com.orion.model.ItemForm
 import com.orion.service.ItemService
 import io.ktor.http.*
@@ -20,12 +20,12 @@ fun Route.itemRouting(itemService: ItemService) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid item ID")
                 return@get
             }
-            val principal = call.principal<User>() ?: run {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>() ?: run {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
                 return@get
             }
 
-            val result = itemService.findById(id, principal)
+            val result = itemService.findById(id, user)
             call.respondWithErrorProcessing(result)
         }
 
@@ -42,12 +42,12 @@ fun Route.itemRouting(itemService: ItemService) {
 
         post {
             val itemForm = call.receive<ItemForm>()
-            val principal = call.principal<User>() ?: run {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>() ?: run {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
                 return@post
             }
 
-            val result = itemService.create(itemForm, principal)
+            val result = itemService.create(itemForm, user)
             call.respondWithErrorProcessing(result)
         }
 
@@ -59,20 +59,20 @@ fun Route.itemRouting(itemService: ItemService) {
             }
 
             val itemForm = call.receive<ItemForm>()
-            val principal = call.principal<User>()
-            val result = itemService.update(id, itemForm, principal!!)
+            val user = call.principal<User>()
+            val result = itemService.update(id, itemForm, user!!)
             call.respondWithErrorProcessing(result)
         }
 
         delete("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
-            val principal = call.principal<User>()
+            val user = call.principal<User>()
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid item ID")
                 return@delete
             }
 
-            val result = itemService.delete(id, principal!!)
+            val result = itemService.delete(id, user!!)
             call.respondWithErrorProcessing(result)
         }
     }

@@ -1,6 +1,6 @@
 package com.orion
 
-import User
+import com.orion.entity.User
 import com.orion.api.*
 import com.orion.model.LoginForm
 import com.orion.model.UserForm
@@ -67,6 +67,7 @@ fun Application.module() {
     val bidService = BidService(actionService, adviceService, promotionService)
     val chatService = ChatService()
     val betService = BetService(actionService, moneyTransactionService)
+    val reviewService = ReviewService()
 
     install(CallLogging)
     install(ContentNegotiation) {
@@ -126,6 +127,8 @@ fun Application.module() {
             itemRouting(itemService)
             betRouting(betService)
             chatRouting(chatService)
+            reviewRouting(reviewService)
+            promotionRouting(promotionService)
         }
     }
 }

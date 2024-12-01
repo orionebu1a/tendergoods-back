@@ -1,6 +1,6 @@
 package com.orion.api
 
-import User
+import com.orion.entity.User
 import com.orion.filter.BidPageFilter
 import com.orion.model.BidForm
 import com.orion.service.BidService
@@ -17,12 +17,12 @@ fun Route.bidRouting(bidService: BidService) {
 
         post("paged") {
             val bidPageFilter = call.receive<BidPageFilter>()
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
                 return@post
             }
-            val bids = bidService.findPagedByFilter(bidPageFilter, principal)
+            val bids = bidService.findPagedByFilter(bidPageFilter, user)
             call.respond(bids)
         }
 
@@ -32,13 +32,13 @@ fun Route.bidRouting(bidService: BidService) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid bid ID")
                 return@get
             }
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
                 return@get
             }
 
-            val result = bidService.findById(id, principal)
+            val result = bidService.findById(id, user)
             call.respondWithErrorProcessing(result)
         }
 
@@ -69,12 +69,12 @@ fun Route.bidRouting(bidService: BidService) {
                 return@delete
             }
 
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
                 return@delete
             }
-            val result = bidService.delete(id, principal)
+            val result = bidService.delete(id, user)
             call.respondWithErrorProcessing(result)
         }
 

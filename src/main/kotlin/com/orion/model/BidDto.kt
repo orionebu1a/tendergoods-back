@@ -38,6 +38,5 @@ data class BidForm (
     val startTime: Instant,
     @Serializable(with = InstantSerializer::class)
     val endTime: Instant,
-    val promotionRating: Int? = null,
     val items: List<Int>,
 )

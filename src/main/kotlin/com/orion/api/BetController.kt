@@ -1,6 +1,6 @@
 package com.orion.api
 
-import User
+import com.orion.entity.User
 import com.orion.model.BetForm
 import com.orion.service.BetService
 import io.ktor.http.*
@@ -15,11 +15,11 @@ fun Route.betRouting(betService: BetService) {
     route("/bet") {
         post("doBet") {
             val betForm = call.receive<BetForm>()
-            val principal = call.principal<User>()
-            if (principal == null) {
-                call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
+            val user = call.principal<User>()
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
             }
-            val result = betService.doBet(betForm.bidId, betForm.newPrice, principal!!)
+            val result = betService.doBet(betForm.bidId, betForm.newPrice, user!!)
             call.respondWithErrorProcessing(result)
         }
     }

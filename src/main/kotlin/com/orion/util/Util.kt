@@ -1,6 +1,6 @@
 package com.orion.util
 
-import User
+import com.orion.entity.User
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 
