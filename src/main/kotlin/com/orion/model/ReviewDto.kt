@@ -9,7 +9,7 @@ data class ReviewDto (
     val reviewer: String,
     val reviewed: String,
     var rating: Double,
-    var reviewText: String,
+    var reviewText: String?,
     @Serializable(with = InstantSerializer::class)
     var createdAt: Instant,
 )
