@@ -1,5 +1,3 @@
-package promotion
-
 import com.orion.entity.User
 import com.orion.model.LoginForm
 import com.orion.security.PasswordService
@@ -68,7 +66,7 @@ open class IntegrationTest {
                         lastName = "Ivanov"
                         age = 30
                         gender = "male"
-                        rating = 5.0
+                        rating = 4.0
                         walletBalance = 10.0
                         createdAt = Instant.now()
                         updatedAt = Instant.now()
@@ -81,7 +79,20 @@ open class IntegrationTest {
                         lastName = "Petrova"
                         age = 40
                         gender = "female"
-                        rating = 3.0
+                        rating = 4.0
+                        walletBalance = 21.0
+                        createdAt = Instant.now()
+                        updatedAt = Instant.now()
+                    }
+
+                    User.new {
+                        email = "marina@gmail.com"
+                        passwordHash = passwordService.hashPassword(password)
+                        firstName = "Marina"
+                        lastName = "Petrova"
+                        age = 20
+                        gender = "female"
+                        rating = 4.0
                         walletBalance = 21.0
                         createdAt = Instant.now()
                         updatedAt = Instant.now()
@@ -139,7 +150,21 @@ open class IntegrationTest {
         assertEquals(HttpStatusCode.OK, loginResponse3.status)
         val token3 = loginResponse3.bodyAsText()
 
-        return listOf(token1, token2, token3)
+        val password4 = "password"
+        val email4 = "marina@gmail.com"
+        val loginResponse4 = client.post("/login") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                LoginForm(
+                    email = email4,
+                    password = password4
+                )
+            )
+        }
+        assertEquals(HttpStatusCode.OK, loginResponse3.status)
+        val token4 = loginResponse4.bodyAsText()
+
+        return listOf(token1, token2, token3, token4)
     }
 
 }

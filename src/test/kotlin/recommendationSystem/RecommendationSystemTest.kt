@@ -1,10 +1,9 @@
-package promotion.user
+package recommendationSystem
 
-import com.orion.entity.Promotion
+import IntegrationTest
 import com.orion.enums.BidState
 import com.orion.filter.BidPageFilter
 import com.orion.model.*
-import com.orion.table.PromotionTable
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -12,15 +11,13 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.Test
-import promotion.IntegrationTest
 import java.time.Instant
 import kotlin.test.assertEquals
 
-class PromotionTest : IntegrationTest() {
+class RecommendationSystemTest : IntegrationTest() {
     @Test
-    fun basePromotionTest() = testApplication {
+    fun recommendationTest() = testApplication {
         val client = createClient {
             install(ContentNegotiation) {
                 json()
@@ -29,7 +26,8 @@ class PromotionTest : IntegrationTest() {
         val tokenList = tokenLoginHelper()
         val tokenMy = tokenList[0]
         val tokenOtherSeller = tokenList[1]
-        val tokenUser = tokenList[2]
+        val tokenSeller3 = tokenList[2]
+        val tokenUser = tokenList[3]
 
         val responseItem1 = client.post("/items") {
             contentType(ContentType.Application.Json)
@@ -88,7 +86,7 @@ class PromotionTest : IntegrationTest() {
                     title = "Его Товар 1",
                     description = "",
                     totalAmount = 2,
-                    categoryId = 1,
+                    categoryId = 2,
                     imageUrl = ""
                 )
             )
@@ -102,7 +100,7 @@ class PromotionTest : IntegrationTest() {
                     title = "Его Товар 2",
                     description = "",
                     totalAmount = 5,
-                    categoryId = 1,
+                    categoryId = 2,
                     imageUrl = ""
                 )
             )
@@ -129,6 +127,40 @@ class PromotionTest : IntegrationTest() {
         }
         val bid2 = Json.decodeFromString<BidDto>(responseBid2.bodyAsText())
 
+        val responseItem5 = client.post("/items") {
+            contentType(ContentType.Application.Json)
+            bearerAuth(tokenSeller3)
+            setBody(
+                ItemForm(
+                    title = "Его Товар 1",
+                    description = "",
+                    totalAmount = 2,
+                    categoryId = 3,
+                    imageUrl = ""
+                )
+            )
+        }
+
+        val item5 = Json.decodeFromString<ItemDto>(responseItem3.bodyAsText())
+
+        val responseBid3 = client.post("/bids") {
+            contentType(ContentType.Application.Json)
+            bearerAuth(tokenSeller3)
+            setBody(
+                BidForm(
+                    startingPrice = 100.0,
+                    priceIncrement = 20.0,
+                    location = "Moscow",
+                    latitude = 55.0,
+                    longitude = 35.0,
+                    startTime = Instant.now(),
+                    endTime = Instant.now().plusMillis(1000),
+                    items = listOf(item5.id),
+                )
+            )
+        }
+        val bid3 = Json.decodeFromString<BidDto>(responseBid3.bodyAsText())
+
         val bidsBeforePromotion = client.post("/bids/paged") {
             contentType(ContentType.Application.Json)
             bearerAuth(tokenUser)
@@ -141,41 +173,9 @@ class PromotionTest : IntegrationTest() {
             )
         }
 
-        val firstBid = Json.decodeFromString<List<BidDto>>(bidsBeforePromotion.bodyAsText())[0]
-        assertEquals(firstBid.id, bid2.id)
-        //Изначально первым должен быть последний опубликованный лот
+        val firstBidAfterPromotion = Json.decodeFromString<List<BidDto>>(bidsBeforePromotion.bodyAsText())
+            .map { it.id }
 
-        val promotionResponse = client.post("/promotions/buyPromotion") {
-            contentType(ContentType.Application.Json)
-            bearerAuth(tokenMy)
-            setBody(
-                BuyPromotionForm(
-                    id = 1,
-                    bidId = bid1.id,
-                )
-            )
-        }
-        assertEquals(promotionResponse.status, HttpStatusCode.OK)
-
-        transaction {
-            val promotions = Promotion.all()
-            println("ОТЛАДКА")
-            println(promotions.map { it.user.id to it.bid.id })
-        }
-        val bidsAfterPromotion = client.post("/bids/paged") {
-            contentType(ContentType.Application.Json)
-            bearerAuth(tokenUser)
-            setBody(
-                BidPageFilter(
-                    from = 0,
-                    to = 10,
-                    state = BidState.ALL,
-                )
-            )
-        }
-
-        //Теперь продвижение должно показать первым мой лот
-        val firstBidAfterPromotion = Json.decodeFromString<List<BidDto>>(bidsAfterPromotion.bodyAsText())[0]
-        assertEquals(firstBidAfterPromotion.id, bid1.id)
+        assertEquals(listOf(bid3.id, bid2.id, bid1.id), firstBidAfterPromotion)
     }
 }

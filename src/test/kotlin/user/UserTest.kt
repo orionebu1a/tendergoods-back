@@ -1,4 +1,4 @@
-package promotion.user;
+package user;
 
 import com.orion.model.LoginForm
 import com.orion.model.UserDto
@@ -12,16 +12,13 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
-import promotion.IntegrationTest
+import IntegrationTest
 import java.time.Instant
 import kotlin.test.assertEquals
 
 class UserTest : IntegrationTest() {
     @Test
     fun simpleUserTest() = testApplication {
-        application {
-            module()
-        }
         val client = createClient {
             install(ContentNegotiation) {
                 json()
