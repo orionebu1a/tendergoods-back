@@ -15,6 +15,8 @@ class InternalMoneyTransactionService {
         if (user.walletBalance < bid.currentPrice) {
             ResultWithError.Failure(ServiceError.Custom("Not enough balance"))
         }
+        user.walletBalance -= bid.currentPrice
+        bid.user.walletBalance += bid.currentPrice
         ResultWithError.Success(MoneyTransaction.new {
             this.sender = user.id
             this.transactionType = TransactionType.BID.name
@@ -23,20 +25,12 @@ class InternalMoneyTransactionService {
         })
     }
 
-    fun getPaymentForBid(bid: Bid): MoneyTransaction = transaction {
-        MoneyTransaction.new {
-            this.receiver = bid.user.id
-            this.transactionType = TransactionType.BID.name
-            this.money = bid.currentPrice
-            this.time = Instant.now()
-        }
-    }
-
     fun payForPromotion(user: User, promotion: Promotion): ResultWithError<MoneyTransaction> = transaction {
         val promotionPrice = promotion.promotionType.price
         if (user.walletBalance < promotionPrice) {
             ResultWithError.Failure(ServiceError.Custom("Not enough balance to buy promotion"))
         }
+        user.walletBalance -= promotionPrice
         ResultWithError.Success(MoneyTransaction.new {
             this.sender = user.id
             this.transactionType = TransactionType.PROMOTION.name

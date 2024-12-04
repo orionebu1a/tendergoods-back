@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 import com.orion.errors.respondWithErrorProcessing
 
 fun Route.betRouting(betService: BetService) {
-    route("/bet") {
+    route("/bets") {
         post("doBet") {
             val betForm = call.receive<BetForm>()
             val user = call.principal<User>()

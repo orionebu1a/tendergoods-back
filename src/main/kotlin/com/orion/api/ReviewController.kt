@@ -12,7 +12,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.reviewRouting(reviewService: ReviewService) {
-    route("/review") {
+    route("/reviews") {
         post {
             val reviewForm = call.receive<ReviewForm>()
             val user = call.principal<User>()

@@ -32,15 +32,6 @@ class UserService {
         User.findById(id)
     }
 
-    fun findByLogin(login: String): ResultWithError<UserDto> = transaction {
-        val user = User.find { UserTable.email eq login }.firstOrNull()
-        if (user != null) {
-            ResultWithError.Success(user.toDto())
-        } else {
-            ResultWithError.Failure(ServiceError.NotFound)
-        }
-    }
-
     fun findPrincipalByLogin(login: String): User? = transaction {
         User.find { UserTable.email eq login }.firstOrNull()
     }

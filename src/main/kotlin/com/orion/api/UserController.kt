@@ -27,12 +27,6 @@ fun Route.userRouting(userService: UserService) {
             call.respondWithErrorProcessing(result)
         }
 
-        post {
-            val userForm = call.receive<UserForm>()
-            val result = userService.create(userForm)
-            call.respondWithErrorProcessing(result)
-        }
-
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {

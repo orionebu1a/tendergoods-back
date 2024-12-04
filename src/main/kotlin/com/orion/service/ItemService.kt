@@ -25,15 +25,6 @@ class ItemService (
         }
     }
 
-    fun findAll(): ResultWithError<List<ItemDto>> = transaction {
-        try {
-            val items = Item.all().toList()
-            ResultWithError.Success(items.map { it.toDto() })
-        } catch (e: Exception) {
-            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Database error"))
-        }
-    }
-
     fun findById(id: Int, user: User): ResultWithError<ItemDto> = transaction {
         val item = Item.findById(id)
         if (item != null) {

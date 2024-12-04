@@ -34,12 +34,12 @@ fun main(args: Array<String>) {
 fun Application.module() {
     val config = environment.config
 
+    val isTest = System.getenv("KTOR_ENV") == "test"
+
     val dbUser = config.property("ktor.database.user").getString()
     val dbPassword = config.property("ktor.database.password").getString()
 
-    val isTestEnvironment = config.property("ktor.test.enabled").getString().toBoolean()
-
-    val dbUrl = if (isTestEnvironment) {
+    val dbUrl = if (isTest) {
         config.property("ktor.test.database.url").getString()
     } else {
         config.property("ktor.database.url").getString()

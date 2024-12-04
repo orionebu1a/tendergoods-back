@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 import com.orion.errors.respondWithErrorProcessing
 
 fun Route.chatRouting(chatService: ChatService) {
-    route("/chat") {
+    route("/chats") {
         post("sendMessage") {
             val messageForm = call.receive<MessageForm>()
             val user = call.principal<User>()
