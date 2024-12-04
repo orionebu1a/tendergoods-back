@@ -14,7 +14,8 @@ class BetService(
 ) {
     fun doBet(bidId: Int, newBet: Double, user: User): ResultWithError<String> = transaction {
         val bid = Bid.findById(bidId) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
-        if (bid.endTime < Instant.now()) {
+        val currentTime = Instant.now()
+        if (bid.endTime < currentTime) {
             return@transaction ResultWithError.Failure(ServiceError.Custom("Bid is over"))
         }
         if (bid.currentPrice > newBet) {
@@ -29,7 +30,8 @@ class BetService(
         bid.endTime = if (bid.endTime.minusSeconds(Instant.now().epochSecond) > Instant.ofEpochSecond(10 * 60)) {
             bid.endTime
         } else {
-            Instant.now().plusSeconds(10 * 60)
+            //TODO fix
+            Instant.now().plusSeconds(5)
         }
         actionService.doBidActionBySelf(user, ActionType.BET, bid)
         moneyTransactionService.payForBet(user, bid)

@@ -20,7 +20,8 @@ class ChatService {
             bidToBind.lastUserBet != user.id) {
             return@transaction ResultWithError.Failure(ServiceError.Custom("Chat without buying or selling impossible"))
         }
-        if (bidToBind.endTime > Instant.now()) {
+        val currentTime = Instant.now()
+        if (bidToBind.endTime > currentTime) {
             return@transaction ResultWithError.Failure(ServiceError.Custom("Bid still active"))
         }
         val reciever = User.findById(userId) ?: return@transaction ResultWithError.Failure(ServiceError.Custom("Reciever not found not found"))

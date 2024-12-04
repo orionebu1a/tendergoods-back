@@ -17,6 +17,11 @@ import java.time.Instant
 
 open class IntegrationTest {
     companion object {
+        var user1: User? = null
+        var user2: User? = null
+        var user3: User? = null
+        var user4: User? = null
+
         @JvmStatic
         @BeforeAll
         fun setupDatabase() = testApplication {
@@ -47,7 +52,7 @@ open class IntegrationTest {
 
                 transaction {
                     val password = "password"
-                    User.new {
+                    user1 = User.new {
                         email = "mcs@gmail.com"
                         passwordHash = passwordService.hashPassword(password)
                         firstName = "Alexey"
@@ -60,7 +65,7 @@ open class IntegrationTest {
                         updatedAt = Instant.now()
                     }
 
-                    User.new {
+                    user2 = User.new {
                         email = "ivan@gmail.com"
                         passwordHash = passwordService.hashPassword(password)
                         firstName = "Ivan"
@@ -73,7 +78,7 @@ open class IntegrationTest {
                         updatedAt = Instant.now()
                     }
 
-                    User.new {
+                    user3 = User.new {
                         email = "daria@gmail.com"
                         passwordHash = passwordService.hashPassword(password)
                         firstName = "Daria"
@@ -86,7 +91,7 @@ open class IntegrationTest {
                         updatedAt = Instant.now()
                     }
 
-                    User.new {
+                    user4 = User.new {
                         email = "marina@gmail.com"
                         passwordHash = passwordService.hashPassword(password)
                         firstName = "Marina"

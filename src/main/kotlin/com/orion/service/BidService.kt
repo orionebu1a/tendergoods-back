@@ -138,6 +138,7 @@ class BidService(
                 location = bid.location
                 startTime = bid.startTime
                 endTime = bid.endTime
+                lastUserBet = user.id
                 createdAt = Instant.now()
                 updatedAt = Instant.now()
             }
