@@ -30,14 +30,6 @@ fun Route.chatRouting(chatService: ChatService) {
             val result = chatService.getAllChatsWithLastMessage(user!!)
             call.respondWithErrorProcessing(result)
         }
-        get("chatHistory") {
-            val user = call.principal<User>()
-            if (user == null) {
-                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
-            }
-            val result = chatService.getAllChatsWithLastMessage(user!!)
-            call.respondWithErrorProcessing(result)
-        }
         get("{id}") {
             val id = call.parameters["id"]!!.toInt()
             val user = call.principal<User>()
