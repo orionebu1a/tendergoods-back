@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
 fun Application.module() {
     val config = environment.config
 
-    val isTest = System.getenv("KTOR_ENV") == "test"
+    val isTest = System.getProperty("KTOR_ENV") == "test"
 
     val dbUser = config.property("ktor.database.user").getString()
     val dbPassword = config.property("ktor.database.password").getString()
@@ -113,7 +113,7 @@ fun Application.module() {
         post("register") {
             val userForm = call.receive<UserForm>()
             userService.create(
-                userForm
+                userForm, PasswordService.hashPassword(userForm.password)
             )
             call.respond(HttpStatusCode.OK)
         }

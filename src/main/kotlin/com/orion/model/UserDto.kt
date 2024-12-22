@@ -8,7 +8,6 @@ import java.time.Instant
 data class UserDto (
     val id: Int,
     val email: String,
-    val passwordHash: String,
     val firstName: String? = null,
     val lastName: String? = null,
     val age: Int? = null,
@@ -24,7 +23,7 @@ data class UserDto (
 @Serializable
 data class UserForm (
     val email: String,
-    val passwordHash: String,
+    val password: String,
     val firstName: String? = null,
     val lastName: String? = null,
     val age: Int? = null,

@@ -11,6 +11,7 @@ import com.orion.errors.ServiceError
 import com.orion.filter.BidPageFilter
 import com.orion.model.BidDto
 import com.orion.model.BidForm
+import com.orion.model.ItemDto
 import com.orion.table.BidTable
 import com.orion.table.ItemTable
 import com.orion.util.haversine
@@ -117,6 +118,15 @@ class BidService(
                 it.subList(fromIndex, toIndex)
             }
             .map { it.toDto() }
+    }
+
+    fun findAllUserBids(userId: Int): ResultWithError<List<BidDto>> = transaction {
+        try {
+            val bids = Bid.find { BidTable.user eq userId }.toList()
+            ResultWithError.Success(bids.map { it.toDto() })
+        } catch (e: Exception) {
+            ResultWithError.Failure(ServiceError.DatabaseError(e.message ?: "Database error"))
+        }
     }
 
     fun findById(id: Int, user: User): ResultWithError<BidDto> = transaction {

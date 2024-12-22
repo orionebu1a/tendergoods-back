@@ -25,7 +25,7 @@ open class IntegrationTest {
         @JvmStatic
         @BeforeAll
         fun setupDatabase() = testApplication {
-            System.setProperty("ktor.test.enabled", "true")
+            System.setProperty("KTOR_ENV", "test")
             application {
                 val passwordService = PasswordService
                 val config = environment.config

@@ -60,7 +60,7 @@ class ChatTest : IntegrationTest() {
             )
         }
         val bid1 = Json.decodeFromString<BidDto>(responseBid1.bodyAsText())
-        val responseBet = client.post("/bet/doBet") {
+        val responseBet = client.post("/bets/doBet") {
             contentType(ContentType.Application.Json)
             bearerAuth(token1)
             setBody(
@@ -76,7 +76,7 @@ class ChatTest : IntegrationTest() {
             delay(7000)
         }
 
-        val sendMessageResponse = client.post("/chat/sendMessage") {
+        val sendMessageResponse = client.post("/chats/sendMessage") {
             contentType(ContentType.Application.Json)
             bearerAuth(token1)
             setBody(
@@ -89,7 +89,7 @@ class ChatTest : IntegrationTest() {
         }
         Assertions.assertEquals(HttpStatusCode.OK, sendMessageResponse.status)
 
-        val replyMessageResponse = client.post("/chat/sendMessage") {
+        val replyMessageResponse = client.post("/chats/sendMessage") {
             contentType(ContentType.Application.Json)
             bearerAuth(token2)
             setBody(
@@ -103,7 +103,7 @@ class ChatTest : IntegrationTest() {
         Assertions.assertEquals(HttpStatusCode.OK, replyMessageResponse.status)
 
         // User 1 retrieves the list of all their chats
-        val allChatsResponse = client.get("/chat/allUserChats") {
+        val allChatsResponse = client.get("/chats/allUserChats") {
             bearerAuth(token1)
         }
         Assertions.assertEquals(HttpStatusCode.OK, allChatsResponse.status)
@@ -112,7 +112,7 @@ class ChatTest : IntegrationTest() {
         Assertions.assertEquals(1, allChats.chats.size)
         Assertions.assertEquals(1, allChats.chats.first().first)
 
-        val chatHistoryResponse = client.get("/chat/${allChats.chats.first().first}") {
+        val chatHistoryResponse = client.get("/chats/${allChats.chats.first().first}") {
             bearerAuth(token1)
         }
         Assertions.assertEquals(HttpStatusCode.OK, chatHistoryResponse.status)

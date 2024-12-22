@@ -3,26 +3,10 @@ package com.orion.converter
 import com.orion.entity.User
 import com.orion.model.UserDto
 
-fun UserDto.toModel(): User {
-    return User.new {
-        email = this@toModel.email
-        passwordHash = this@toModel.passwordHash
-        firstName = this@toModel.firstName
-        lastName = this@toModel.lastName
-        age = this@toModel.age
-        gender = this@toModel.gender
-        rating = this@toModel.rating
-        walletBalance = this@toModel.walletBalance
-        createdAt = this@toModel.createdAt!!
-        updatedAt = this@toModel.updatedAt!!
-    }
-}
-
 fun User.toDto(): UserDto {
     return UserDto(
         id = this.id.value,
         email = this.email,
-        passwordHash = this.passwordHash,
         firstName = this.firstName,
         lastName = this.lastName,
         age = this.age,

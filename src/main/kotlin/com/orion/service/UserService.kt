@@ -36,17 +36,17 @@ class UserService {
         User.find { UserTable.email eq login }.firstOrNull()
     }
 
-    fun create(userDto: UserForm): ResultWithError<UserDto> = transaction {
+    fun create(userForm: UserForm, hashedPassword: String): ResultWithError<UserDto> = transaction {
         try {
             val user = User.new {
-                email = userDto.email
-                passwordHash = userDto.passwordHash
-                firstName = userDto.firstName
-                lastName = userDto.lastName
-                age = userDto.age
-                gender = userDto.gender
-                rating = userDto.rating
-                walletBalance = userDto.walletBalance
+                email = userForm.email
+                passwordHash = hashedPassword
+                firstName = userForm.firstName
+                lastName = userForm.lastName
+                age = userForm.age
+                gender = userForm.gender
+                rating = userForm.rating
+                walletBalance = userForm.walletBalance
                 createdAt = Instant.now()
                 updatedAt = Instant.now()
             }
@@ -61,7 +61,7 @@ class UserService {
 
         try {
             user.email = userDto.email
-            user.passwordHash = userDto.passwordHash
+            user.passwordHash = userDto.password
             user.firstName = userDto.firstName
             user.lastName = userDto.lastName
             user.age = userDto.age

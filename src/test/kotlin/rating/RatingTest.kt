@@ -116,7 +116,7 @@ class RatingTest : IntegrationTest() {
         assertEquals(decodedBids, listOf(bid2.id, bid1.id))
         //Изначально первым должен быть последний опубликованный лот
 
-        val reviewResponse = client.post("/review") {
+        val reviewResponse = client.post("/reviews") {
             contentType(ContentType.Application.Json)
             bearerAuth(token4)
             setBody(

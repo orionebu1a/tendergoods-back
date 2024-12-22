@@ -26,6 +26,17 @@ fun Route.bidRouting(bidService: BidService) {
             call.respond(bids)
         }
 
+        get("/ownedByUser/{id}") {
+            val userId = call.parameters["id"]?.toIntOrNull()
+            if (userId == null) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+                return@get
+            }
+
+            val result = bidService.findAllUserBids(userId)
+            call.respondWithErrorProcessing(result)
+        }
+
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {

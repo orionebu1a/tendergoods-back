@@ -28,7 +28,6 @@ class UserTest : IntegrationTest() {
         val user = UserDto(
             id = 1,
             email = "mcs@gmail.com",
-            passwordHash = passwordService.hashPassword(password),
             firstName = "Alexey",
             lastName = "Petrov",
             age = 20,
