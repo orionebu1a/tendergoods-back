@@ -1,6 +1,8 @@
 package com.orion.api
 
+import com.orion.entity.ItemCategory
 import com.orion.entity.User
+import com.orion.errors.ResultWithError
 import com.orion.model.ItemForm
 import com.orion.service.ItemService
 import io.ktor.http.*
@@ -13,6 +15,16 @@ import com.orion.errors.respondWithErrorProcessing
 
 fun Route.itemRouting(itemService: ItemService) {
     route("/items") {
+
+        get("categories") {
+            val user = call.principal<User>() ?: run {
+                call.respond(HttpStatusCode.Unauthorized, "com.orion.entity.User not authenticated")
+                return@get
+            }
+
+            val result = ResultWithError.Success(ItemCategory.all().toList())
+            call.respondWithErrorProcessing(result)
+        }
 
         get("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
