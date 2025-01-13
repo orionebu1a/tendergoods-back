@@ -4,6 +4,7 @@ import com.orion.entity.User
 import com.orion.converter.toDto
 import com.orion.entity.Bid
 import com.orion.entity.Message
+import com.orion.entity.getFullName
 import com.orion.errors.ResultWithError
 import com.orion.errors.ServiceError
 import com.orion.model.ChatsDto
@@ -40,7 +41,7 @@ class ChatService {
             (MessageTable.sender eq user.id) or (MessageTable.receiver eq user.id)
         }.groupBy { it.bid.value }.mapValues { entry ->
             entry.value.maxByOrNull { it.createdAt }
-        }.map { it.key to it.value?.text }))
+        }.map { Bid.findById(it.key)?.user?.getFullName() to it.value?.text }))
     }
 
     fun getChatHistory(user: User, bidId: Int) : ResultWithError<List<MessageDto>> = transaction {

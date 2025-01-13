@@ -8,7 +8,7 @@ fun Bid.toDto(): BidDto {
         id = this.id.value,
         userId = this.user.id.value,
         currentPrice = this.currentPrice,
-        items = this.items.toList().map { it.id.value },
+        items = this.items.toList().map { it.toDto() },
         endTime = this.endTime,
         location = this.location,
         priceIncrement = this.priceIncrement,

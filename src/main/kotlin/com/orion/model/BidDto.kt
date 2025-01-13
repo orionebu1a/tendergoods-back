@@ -19,7 +19,7 @@ data class BidDto (
     @Serializable(with = InstantSerializer::class)
     val endTime: Instant,
     val promotionRating: Int? = null,
-    val items: List<Int>,
+    val items: List<ItemDto>,
     @Serializable(with = InstantSerializer::class)
     val createdAt: Instant? = null,
     @Serializable(with = InstantSerializer::class)

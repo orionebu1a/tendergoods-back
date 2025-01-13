@@ -109,10 +109,10 @@ class ChatTest : IntegrationTest() {
         Assertions.assertEquals(HttpStatusCode.OK, allChatsResponse.status)
 
         val allChats = Json.decodeFromString<ChatsDto>(allChatsResponse.bodyAsText())
-        Assertions.assertEquals(1, allChats.chats.size)
-        Assertions.assertEquals(1, allChats.chats.first().first)
+        Assertions.assertEquals(1, allChats.userNameLastMessage.size)
+        Assertions.assertEquals("Ivan Ivanov", allChats.userNameLastMessage.first().first)
 
-        val chatHistoryResponse = client.get("/chats/${allChats.chats.first().first}") {
+        val chatHistoryResponse = client.get("/chats/${bid1.id}") {
             bearerAuth(token1)
         }
         Assertions.assertEquals(HttpStatusCode.OK, chatHistoryResponse.status)

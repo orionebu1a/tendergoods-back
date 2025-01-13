@@ -11,7 +11,6 @@ import com.orion.errors.ServiceError
 import com.orion.filter.BidPageFilter
 import com.orion.model.BidDto
 import com.orion.model.BidForm
-import com.orion.model.ItemDto
 import com.orion.table.BidTable
 import com.orion.table.ItemTable
 import com.orion.util.haversine

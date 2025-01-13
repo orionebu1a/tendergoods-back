@@ -14,7 +14,7 @@ data class MessageDto (
 
 @Serializable
 data class ChatsDto (
-    val chats: List<Pair<Int, String?>>,
+    val userNameLastMessage: List<Pair<String?, String?>>,
 )
 
 @Serializable
