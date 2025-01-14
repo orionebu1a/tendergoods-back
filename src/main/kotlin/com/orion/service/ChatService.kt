@@ -49,6 +49,7 @@ class ChatService {
                     userName = bid.user.getFullName(),
                     lastMessage = it.value?.text,
                     bidId = bid.id.value,
+                    userId = user.id.value,
                 )
             } else {
                 null

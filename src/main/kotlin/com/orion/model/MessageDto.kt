@@ -27,6 +27,7 @@ data class MessageForm (
 @Serializable
 data class BidChatPreviewDto (
     val bidId: Int,
+    val userId: Int,
     val userName: String,
     val lastMessage: String?,
 )
