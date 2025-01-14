@@ -73,7 +73,7 @@ class ChatTest : IntegrationTest() {
         Assertions.assertEquals(HttpStatusCode.OK, responseBet.status)
         println(responseBet.bodyAsText())
         runBlocking {
-            delay(7000)
+            delay(2000)
         }
 
         val sendMessageResponse = client.post("/chats/sendMessage") {
@@ -110,7 +110,7 @@ class ChatTest : IntegrationTest() {
 
         val allChats = Json.decodeFromString<ChatsDto>(allChatsResponse.bodyAsText())
         Assertions.assertEquals(1, allChats.userNameLastMessage.size)
-        Assertions.assertEquals("Ivan Ivanov", allChats.userNameLastMessage.first().first)
+        Assertions.assertEquals("Ivan Ivanov", allChats.userNameLastMessage.first().userName)
 
         val chatHistoryResponse = client.get("/chats/${bid1.id}") {
             bearerAuth(token1)

@@ -11,10 +11,14 @@ import java.time.Instant
 class BetService(
     private val actionService: InternalActionService,
     private val moneyTransactionService: InternalMoneyTransactionService,
+    private val afterBetSeconds: Long,
 ) {
     fun doBet(bidId: Int, newBet: Double, user: User): ResultWithError<String> = transaction {
         val bid = Bid.findById(bidId) ?: return@transaction ResultWithError.Failure(ServiceError.NotFound)
         val currentTime = Instant.now()
+        if (user.walletBalance < newBet) {
+            return@transaction ResultWithError.Failure(ServiceError.Custom("You should have enough money to do bet"))
+        }
         if (bid.endTime < currentTime) {
             return@transaction ResultWithError.Failure(ServiceError.Custom("Bid is over"))
         }
@@ -27,11 +31,10 @@ class BetService(
         bid.currentPrice = newBet
         bid.lastUserBet = user.id
         bid.updatedAt = Instant.now()
-        bid.endTime = if (bid.endTime.minusSeconds(Instant.now().epochSecond) > Instant.ofEpochSecond(10 * 60)) {
+        bid.endTime = if (bid.endTime.minusSeconds(Instant.now().epochSecond) > Instant.ofEpochSecond(afterBetSeconds)) {
             bid.endTime
         } else {
-            //TODO fix
-            Instant.now().plusSeconds(5)
+            Instant.now().plusSeconds(afterBetSeconds)
         }
         actionService.doBidActionBySelf(user, ActionType.BET, bid)
         moneyTransactionService.payForBet(user, bid)

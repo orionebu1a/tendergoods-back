@@ -89,8 +89,7 @@ class MoneyTransactionTest : IntegrationTest() {
             bearerAuth(token1)
         }
 
-        val updatedUser2 = Json.decodeFromString<UserDto>(responseUser1.bodyAsText())
-//        Assertions.assertEquals(updatedUser1.walletBalance, user2!!.walletBalance + 120.0)
-//        TODO
+        val updatedUser2 = Json.decodeFromString<UserDto>(responseUser2.bodyAsText())
+        Assertions.assertEquals(updatedUser2.walletBalance, user2!!.walletBalance + 120.0)
     }
 }

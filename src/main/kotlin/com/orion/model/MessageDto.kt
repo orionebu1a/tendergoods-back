@@ -14,7 +14,7 @@ data class MessageDto (
 
 @Serializable
 data class ChatsDto (
-    val userNameLastMessage: List<Pair<String?, String?>>,
+    val userNameLastMessage: List<BidChatPreviewDto>,
 )
 
 @Serializable
@@ -22,4 +22,11 @@ data class MessageForm (
     val bidId: Int,
     val receiverId: Int,
     val text: String,
+)
+
+@Serializable
+data class BidChatPreviewDto (
+    val bidId: Int,
+    val userName: String,
+    val lastMessage: String?,
 )

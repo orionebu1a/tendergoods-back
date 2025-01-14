@@ -58,6 +58,12 @@ fun Application.module() {
         password = dbPassword
     )
 
+    val afterBetSeconds = if (isTest) {
+        environment.config.property("ktor.test.timings.after_bet_seconds").getString().toLong()
+    } else {
+        environment.config.property("ktor.timings.after_bet_seconds").getString().toLong()
+    }
+
     val moneyTransactionService = InternalMoneyTransactionService()
     val actionService = InternalActionService()
     val adviceService = InternalAdviceService()
@@ -66,7 +72,7 @@ fun Application.module() {
     val itemService = ItemService(actionService)
     val bidService = BidService(actionService, adviceService, promotionService)
     val chatService = ChatService()
-    val betService = BetService(actionService, moneyTransactionService)
+    val betService = BetService(actionService, moneyTransactionService, afterBetSeconds)
     val reviewService = ReviewService()
 
     install(CallLogging)
