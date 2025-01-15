@@ -26,7 +26,7 @@ class ChatService {
         if (bidToBind.endTime > currentTime) {
             return@transaction ResultWithError.Failure(ServiceError.Custom("Bid still active"))
         }
-        val reciever = User.findById(userId) ?: return@transaction ResultWithError.Failure(ServiceError.Custom("Reciever not found not found"))
+        val reciever = User.findById(userId) ?: return@transaction ResultWithError.Failure(ServiceError.Custom("Reciever not found"))
         Message.new {
             sender = user
             receiver = reciever

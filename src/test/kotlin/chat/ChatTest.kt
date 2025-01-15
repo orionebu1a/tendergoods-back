@@ -60,13 +60,32 @@ class ChatTest : IntegrationTest() {
             )
         }
         val bid1 = Json.decodeFromString<BidDto>(responseBid1.bodyAsText())
+
+        val responseBid2 = client.post("/bids") {
+            contentType(ContentType.Application.Json)
+            bearerAuth(token2)
+            setBody(
+                BidForm(
+                    startingPrice = 100.0,
+                    priceIncrement = 20.0,
+                    location = "Moscow",
+                    latitude = 55.0,
+                    longitude = 35.0,
+                    startTime = Instant.now(),
+                    endTime = Instant.now().plusMillis(2000),
+                    items = listOf(item1.id),
+                )
+            )
+        }
+        val bid2 = Json.decodeFromString<BidDto>(responseBid2.bodyAsText())
+
         val responseBet = client.post("/bets/doBet") {
             contentType(ContentType.Application.Json)
             bearerAuth(token1)
             setBody(
                 BetForm(
                     newPrice = 100.0 + 20.0,
-                    bidId = bid1.id,
+                    bidId = bid2.id,
                 )
             )
         }
@@ -81,7 +100,7 @@ class ChatTest : IntegrationTest() {
             bearerAuth(token1)
             setBody(
                 MessageForm(
-                    bidId = bid1.id,
+                    bidId = bid2.id,
                     receiverId = user2!!.id.value,
                     text = "Привет, как дела?"
                 )
@@ -94,7 +113,7 @@ class ChatTest : IntegrationTest() {
             bearerAuth(token2)
             setBody(
                 MessageForm(
-                    bidId = bid1.id,
+                    bidId = bid2.id,
                     receiverId = user1!!.id.value,
                     text = "Привет! Все отлично, спасибо!"
                 )
@@ -112,7 +131,7 @@ class ChatTest : IntegrationTest() {
         Assertions.assertEquals(1, allChats.userNameLastMessage.size)
         Assertions.assertEquals("Ivan Ivanov", allChats.userNameLastMessage.first().userName)
 
-        val chatHistoryResponse = client.get("/chats/${bid1.id}") {
+        val chatHistoryResponse = client.get("/chats/${bid2.id}") {
             bearerAuth(token1)
         }
         Assertions.assertEquals(HttpStatusCode.OK, chatHistoryResponse.status)
